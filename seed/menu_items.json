@@ -1,0 +1,68 @@
+[
+  {
+    "id": "beef_crostini",
+    "name": "Rare beef crostini, horseradish cream",
+    "recipeId": "beef_crostini",
+    "portionsPerHead": 1.5
+  },
+  {
+    "id": "salmon_blini",
+    "name": "Cured salmon blini, crème fraîche",
+    "recipeId": "salmon_blini",
+    "portionsPerHead": 1.5
+  },
+  {
+    "id": "prawn_skewer",
+    "name": "Chargrilled prawn, lemon & chilli",
+    "recipeId": "prawn_skewer",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "chicken_pie",
+    "name": "Mini chicken & leek pie",
+    "recipeId": "chicken_pie",
+    "portionsPerHead": 1.5
+  },
+  {
+    "id": "fig_tart",
+    "name": "Fig, brie & prosciutto tartlet",
+    "recipeId": "fig_tart",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "choc_tart",
+    "name": "Dark chocolate tart, sea salt",
+    "recipeId": "choc_tart",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "grazing",
+    "name": "Grazing table (per 10 guests)",
+    "recipeId": "grazing",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "beef_main",
+    "name": "Eye fillet, kipfler, jus",
+    "recipeId": "beef_main",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "salmon_main",
+    "name": "Roast salmon, heirloom tomato, salsa verde",
+    "recipeId": "salmon_main",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "entree_tomato",
+    "name": "Heirloom tomato, burrata, basil",
+    "recipeId": "entree_tomato",
+    "portionsPerHead": 1
+  },
+  {
+    "id": "corp_sandwich",
+    "name": "Gourmet sandwich selection",
+    "recipeId": "corp_sandwich",
+    "portionsPerHead": 1
+  }
+]

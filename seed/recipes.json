@@ -1,0 +1,267 @@
+[
+  {
+    "id": "beef_crostini",
+    "name": "Rare beef crostini, horseradish cream",
+    "yieldPortions": 40,
+    "ingredients": [
+      {
+        "ingredientId": "beef_eye",
+        "qty": 0.9
+      },
+      {
+        "ingredientId": "sourdough",
+        "qty": 2
+      },
+      {
+        "ingredientId": "cream",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "rocket",
+        "qty": 0.1
+      }
+    ]
+  },
+  {
+    "id": "salmon_blini",
+    "name": "Cured salmon blini, crème fraîche",
+    "yieldPortions": 40,
+    "ingredients": [
+      {
+        "ingredientId": "salmon",
+        "qty": 0.8
+      },
+      {
+        "ingredientId": "cream",
+        "qty": 0.4
+      },
+      {
+        "ingredientId": "eggs",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "lemon",
+        "qty": 0.2
+      }
+    ]
+  },
+  {
+    "id": "prawn_skewer",
+    "name": "Chargrilled prawn, lemon & chilli",
+    "yieldPortions": 30,
+    "ingredients": [
+      {
+        "ingredientId": "prawns",
+        "qty": 1.2
+      },
+      {
+        "ingredientId": "lemon",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "butter",
+        "qty": 0.1
+      }
+    ]
+  },
+  {
+    "id": "chicken_pie",
+    "name": "Mini chicken & leek pie",
+    "yieldPortions": 36,
+    "ingredients": [
+      {
+        "ingredientId": "chicken",
+        "qty": 1.4
+      },
+      {
+        "ingredientId": "puff",
+        "qty": 0.9
+      },
+      {
+        "ingredientId": "cream",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "eggs",
+        "qty": 0.3
+      }
+    ]
+  },
+  {
+    "id": "fig_tart",
+    "name": "Fig, brie & prosciutto tartlet",
+    "yieldPortions": 30,
+    "ingredients": [
+      {
+        "ingredientId": "figs",
+        "qty": 0.6
+      },
+      {
+        "ingredientId": "brie",
+        "qty": 0.4
+      },
+      {
+        "ingredientId": "prosciutto",
+        "qty": 0.25
+      },
+      {
+        "ingredientId": "puff",
+        "qty": 0.6
+      }
+    ]
+  },
+  {
+    "id": "choc_tart",
+    "name": "Dark chocolate tart, sea salt",
+    "yieldPortions": 24,
+    "ingredients": [
+      {
+        "ingredientId": "choc",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "cream",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "butter",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "eggs",
+        "qty": 0.5
+      }
+    ]
+  },
+  {
+    "id": "grazing",
+    "name": "Grazing table (per 10 guests)",
+    "yieldPortions": 10,
+    "ingredients": [
+      {
+        "ingredientId": "brie",
+        "qty": 0.4
+      },
+      {
+        "ingredientId": "manchego",
+        "qty": 0.4
+      },
+      {
+        "ingredientId": "prosciutto",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "figs",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "olive",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "crackers",
+        "qty": 0.4
+      },
+      {
+        "ingredientId": "sourdough",
+        "qty": 2
+      },
+      {
+        "ingredientId": "heirloom",
+        "qty": 0.6
+      }
+    ]
+  },
+  {
+    "id": "beef_main",
+    "name": "Eye fillet, kipfler, jus",
+    "yieldPortions": 10,
+    "ingredients": [
+      {
+        "ingredientId": "beef_eye",
+        "qty": 2
+      },
+      {
+        "ingredientId": "potato",
+        "qty": 2
+      },
+      {
+        "ingredientId": "butter",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "rocket",
+        "qty": 0.2
+      }
+    ]
+  },
+  {
+    "id": "salmon_main",
+    "name": "Roast salmon, heirloom tomato, salsa verde",
+    "yieldPortions": 10,
+    "ingredients": [
+      {
+        "ingredientId": "salmon",
+        "qty": 1.8
+      },
+      {
+        "ingredientId": "heirloom",
+        "qty": 1.2
+      },
+      {
+        "ingredientId": "lemon",
+        "qty": 0.3
+      },
+      {
+        "ingredientId": "rocket",
+        "qty": 0.2
+      }
+    ]
+  },
+  {
+    "id": "entree_tomato",
+    "name": "Heirloom tomato, burrata, basil",
+    "yieldPortions": 10,
+    "ingredients": [
+      {
+        "ingredientId": "heirloom",
+        "qty": 1.5
+      },
+      {
+        "ingredientId": "brie",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "sourdough",
+        "qty": 1
+      }
+    ]
+  },
+  {
+    "id": "corp_sandwich",
+    "name": "Gourmet sandwich selection",
+    "yieldPortions": 10,
+    "ingredients": [
+      {
+        "ingredientId": "sourdough",
+        "qty": 4
+      },
+      {
+        "ingredientId": "chicken",
+        "qty": 0.8
+      },
+      {
+        "ingredientId": "heirloom",
+        "qty": 0.5
+      },
+      {
+        "ingredientId": "rocket",
+        "qty": 0.2
+      },
+      {
+        "ingredientId": "butter",
+        "qty": 0.2
+      }
+    ]
+  }
+]

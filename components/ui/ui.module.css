@@ -1,0 +1,110 @@
+/* Shared primitives, ported from the mockup's stylesheet. */
+
+.pageTitle {
+  font-size: 30px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.pageSub {
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.emptyTitle {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.btn {
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ghost {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.ok {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.warn {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.bad {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.notice {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid #E4D2AF;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.notice code {
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+}

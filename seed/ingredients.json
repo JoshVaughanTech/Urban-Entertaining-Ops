@@ -1,0 +1,162 @@
+[
+  {
+    "id": "beef_eye",
+    "name": "Beef eye fillet",
+    "unit": "kg",
+    "pack": 2.5,
+    "supplier": "Meatsmith",
+    "costPerUnit": 62
+  },
+  {
+    "id": "salmon",
+    "name": "Atlantic salmon fillet",
+    "unit": "kg",
+    "pack": 3,
+    "supplier": "Ocean Made",
+    "costPerUnit": 38
+  },
+  {
+    "id": "chicken",
+    "name": "Free-range chicken thigh",
+    "unit": "kg",
+    "pack": 5,
+    "supplier": "Meatsmith",
+    "costPerUnit": 14.5
+  },
+  {
+    "id": "prawns",
+    "name": "Tiger prawns (16/20)",
+    "unit": "kg",
+    "pack": 1,
+    "supplier": "Ocean Made",
+    "costPerUnit": 34
+  },
+  {
+    "id": "puff",
+    "name": "Butter puff pastry",
+    "unit": "kg",
+    "pack": 1.5,
+    "supplier": "Bidfood",
+    "costPerUnit": 11
+  },
+  {
+    "id": "sourdough",
+    "name": "Sourdough loaf",
+    "unit": "each",
+    "pack": 1,
+    "supplier": "Tivoli Road",
+    "costPerUnit": 6.5
+  },
+  {
+    "id": "brie",
+    "name": "Triple cream brie",
+    "unit": "kg",
+    "pack": 1,
+    "supplier": "Calendar Cheese",
+    "costPerUnit": 42
+  },
+  {
+    "id": "manchego",
+    "name": "Manchego 12mo",
+    "unit": "kg",
+    "pack": 3,
+    "supplier": "Calendar Cheese",
+    "costPerUnit": 39
+  },
+  {
+    "id": "prosciutto",
+    "name": "Prosciutto di Parma",
+    "unit": "kg",
+    "pack": 1,
+    "supplier": "Calendar Cheese",
+    "costPerUnit": 58
+  },
+  {
+    "id": "figs",
+    "name": "Fresh figs",
+    "unit": "kg",
+    "pack": 2,
+    "supplier": "Damian Pike",
+    "costPerUnit": 18
+  },
+  {
+    "id": "rocket",
+    "name": "Wild rocket",
+    "unit": "kg",
+    "pack": 1,
+    "supplier": "Damian Pike",
+    "costPerUnit": 16
+  },
+  {
+    "id": "heirloom",
+    "name": "Heirloom tomatoes",
+    "unit": "kg",
+    "pack": 4,
+    "supplier": "Damian Pike",
+    "costPerUnit": 12
+  },
+  {
+    "id": "potato",
+    "name": "Kipfler potatoes",
+    "unit": "kg",
+    "pack": 10,
+    "supplier": "Damian Pike",
+    "costPerUnit": 5.2
+  },
+  {
+    "id": "lemon",
+    "name": "Lemons",
+    "unit": "kg",
+    "pack": 5,
+    "supplier": "Damian Pike",
+    "costPerUnit": 4.8
+  },
+  {
+    "id": "cream",
+    "name": "Thickened cream",
+    "unit": "L",
+    "pack": 2,
+    "supplier": "Bidfood",
+    "costPerUnit": 5.4
+  },
+  {
+    "id": "butter",
+    "name": "Cultured butter",
+    "unit": "kg",
+    "pack": 5,
+    "supplier": "Bidfood",
+    "costPerUnit": 15
+  },
+  {
+    "id": "choc",
+    "name": "70% dark chocolate",
+    "unit": "kg",
+    "pack": 2.5,
+    "supplier": "Bidfood",
+    "costPerUnit": 24
+  },
+  {
+    "id": "eggs",
+    "name": "Free-range eggs",
+    "unit": "dozen",
+    "pack": 15,
+    "supplier": "Bidfood",
+    "costPerUnit": 6.8
+  },
+  {
+    "id": "olive",
+    "name": "Marinated olives",
+    "unit": "kg",
+    "pack": 2,
+    "supplier": "Bidfood",
+    "costPerUnit": 19
+  },
+  {
+    "id": "crackers",
+    "name": "Lavosh crackers",
+    "unit": "kg",
+    "pack": 1,
+    "supplier": "Bidfood",
+    "costPerUnit": 22
+  }
+]

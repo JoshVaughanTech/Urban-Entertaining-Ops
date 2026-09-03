@@ -1,0 +1,84 @@
+/* Design tokens. These are the palette from the approved mockup, not suggestions.
+   Everything else in the app styles itself with CSS Modules off these variables. */
+
+:root {
+  --bg: #F3F1EC;
+  --paper: #FFFFFF;
+  --line: #DDD8CE;
+  --ink: #1F1D19;
+  --muted: #7A756B;
+  --green: #2F4A3A;
+  --green-soft: #E6ECE7;
+  --amber: #8A5A16;
+  --amber-soft: #F5EBD8;
+  --red: #8C3A2E;
+  --red-soft: #F4E3DF;
+
+  /* row separator inside tables — a lighter tint of --line */
+  --line-soft: #EEEAE2;
+
+  --radius: 8px;
+  --radius-sm: 6px;
+
+  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-body: var(--font-mulish), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+/* The mockup has no focus treatment. The web needs one — this is a
+   deliberate, documented deviation (handover: "deviate only where the
+   web needs it"). */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

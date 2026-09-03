@@ -1,0 +1,26 @@
+[
+  {
+    "id": "bar",
+    "name": "Bar service",
+    "price": 18,
+    "pricingBasis": "head"
+  },
+  {
+    "id": "dessert",
+    "name": "Dessert station",
+    "price": 12,
+    "pricingBasis": "head"
+  },
+  {
+    "id": "extra_hour",
+    "name": "Additional service hour",
+    "price": 380,
+    "pricingBasis": "flat"
+  },
+  {
+    "id": "styling",
+    "name": "Table styling & florals",
+    "price": 650,
+    "pricingBasis": "flat"
+  }
+]

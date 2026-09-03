@@ -1,0 +1,164 @@
+[
+  {
+    "id": "cocktail_classic",
+    "name": "Cocktail — Classic",
+    "style": "cocktail",
+    "blurb": "Six canapés per guest over two hours, roaming service.",
+    "tiers": [
+      {
+        "upToGuests": 60,
+        "pricePerHead": 68
+      },
+      {
+        "upToGuests": 120,
+        "pricePerHead": 62
+      },
+      {
+        "upToGuests": 250,
+        "pricePerHead": 56
+      }
+    ],
+    "includes": [
+      "Wait staff (1 per 25 guests)",
+      "Platters & service ware",
+      "Setup and pack down"
+    ],
+    "minGuests": 30,
+    "maxGuests": 250,
+    "menuItemIds": [
+      "beef_crostini",
+      "salmon_blini",
+      "chicken_pie",
+      "fig_tart"
+    ],
+    "staffPerGuests": 25,
+    "serviceHours": 3
+  },
+  {
+    "id": "cocktail_signature",
+    "name": "Cocktail — Signature",
+    "style": "cocktail",
+    "blurb": "Eight canapés including two substantial, dessert to finish.",
+    "tiers": [
+      {
+        "upToGuests": 60,
+        "pricePerHead": 89
+      },
+      {
+        "upToGuests": 120,
+        "pricePerHead": 82
+      },
+      {
+        "upToGuests": 180,
+        "pricePerHead": 76
+      }
+    ],
+    "includes": [
+      "Wait staff (1 per 20 guests)",
+      "Platters & service ware",
+      "Setup and pack down"
+    ],
+    "minGuests": 30,
+    "maxGuests": 180,
+    "menuItemIds": [
+      "beef_crostini",
+      "salmon_blini",
+      "prawn_skewer",
+      "chicken_pie",
+      "fig_tart",
+      "choc_tart"
+    ],
+    "staffPerGuests": 20,
+    "serviceHours": 4
+  },
+  {
+    "id": "grazing",
+    "name": "Grazing Table",
+    "style": "grazing",
+    "blurb": "Styled table of cheese, charcuterie, fruit and breads.",
+    "tiers": [
+      {
+        "upToGuests": 50,
+        "pricePerHead": 38
+      },
+      {
+        "upToGuests": 150,
+        "pricePerHead": 34
+      }
+    ],
+    "includes": [
+      "Styling & props",
+      "Setup and pack down"
+    ],
+    "minGuests": 20,
+    "maxGuests": 150,
+    "menuItemIds": [
+      "grazing"
+    ],
+    "staffPerGuests": null,
+    "serviceHours": 2
+  },
+  {
+    "id": "seated_three",
+    "name": "Seated — Three Course",
+    "style": "seated",
+    "blurb": "Alternate drop entrée, main and dessert with full service.",
+    "tiers": [
+      {
+        "upToGuests": 40,
+        "pricePerHead": 145
+      },
+      {
+        "upToGuests": 80,
+        "pricePerHead": 135
+      },
+      {
+        "upToGuests": 120,
+        "pricePerHead": 128
+      }
+    ],
+    "includes": [
+      "Wait staff (1 per 12 guests)",
+      "Chef on site",
+      "Crockery, cutlery, glassware"
+    ],
+    "minGuests": 20,
+    "maxGuests": 120,
+    "menuItemIds": [
+      "entree_tomato",
+      "beef_main",
+      "salmon_main",
+      "choc_tart"
+    ],
+    "staffPerGuests": 12,
+    "serviceHours": 5
+  },
+  {
+    "id": "corporate_lunch",
+    "name": "Corporate Lunch",
+    "style": "corporate",
+    "blurb": "Delivered sandwiches, salads and sweets for the boardroom.",
+    "tiers": [
+      {
+        "upToGuests": 30,
+        "pricePerHead": 32
+      },
+      {
+        "upToGuests": 200,
+        "pricePerHead": 27
+      }
+    ],
+    "includes": [
+      "Delivery within 15km",
+      "Disposable service ware"
+    ],
+    "minGuests": 10,
+    "maxGuests": 200,
+    "menuItemIds": [
+      "corp_sandwich",
+      "choc_tart"
+    ],
+    "staffPerGuests": null,
+    "serviceHours": 0
+  }
+]
