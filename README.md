@@ -12,7 +12,7 @@ There is exactly one copy of that data.
 
 ## Stack
 
-Next.js 15 (App Router, TypeScript strict) · Postgres on Supabase · Drizzle ORM ·
+Next.js 15 (App Router, TypeScript strict) · Postgres on Supabase · Drizzle ORM (node-postgres) ·
 Supabase Auth (email magic link) · CSS Modules with global tokens · Vitest · Vercel.
 
 ## Getting started
@@ -32,10 +32,19 @@ cp .env.local.example .env.local
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API |
 | `DATABASE_URL` | Supabase → Project Settings → Database → Connection string (URI) |
+| `DATABASE_POOL_MAX` | Optional. Connection pool size, default 10 |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` in dev; the Vercel URL in production |
 | `RESEND_API_KEY` | Phase 3 — sending client quotes |
 
-Then:
+Then create the schema, load the catalogue, and run it:
+
+```bash
+npm run db:migrate
+```
+
+```bash
+npm run db:seed
+```
 
 ```bash
 npm run dev
@@ -51,10 +60,10 @@ explains what is missing. No key is ever faked or defaulted.
 | `npm run dev` | Dev server on :3000 |
 | `npm run build` | Production build |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Vitest — the calculation engine |
+| `npm test` | Vitest — engine, CSV import, migration and seed |
 | `npm run db:generate` | Generate a migration from `lib/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
-| `npm run db:seed` | Load `seed/*.json` (Phase 1) |
+| `npm run db:seed` | Load `seed/*.json` — safe to re-run |
 
 ## Layout
 
@@ -64,14 +73,19 @@ app/
   login/             magic-link sign in
   auth/              callback + sign out
   app/               everything behind auth
-components/          Sidebar, shell, CSS-Modules UI kit
+components/
+  ui/                CSS-Modules primitives: card, table, form, tags
+  forms/             client components that call server actions
 lib/
   auth.ts            requireUser() — the gate every server action starts with
+  actions/           server actions; each one re-checks auth
+  data/              the only place that turns database rows into engine types
   db/schema.ts       Drizzle schema
-  engine/            pure calculation functions, no DB access (Phase 1)
-  supabase/          browser / server / middleware clients
+  engine/            pure calculation functions, no DB access
+  import/            CSV parsing and validation, pure
+  seed/              seed data and the assumptions behind it
 reference/mockup.jsx the approved interactive mockup — the design authority
-seed/*.json          placeholder catalogue data behind the mockup
+seed/*.json          placeholder catalogue data, exactly as delivered
 ```
 
 ## Conventions
@@ -82,14 +96,54 @@ seed/*.json          placeholder catalogue data behind the mockup
 - **No server action without an auth check.** `/q/[token]` (Phase 3) is the only public route.
 - **The mockup is the design.** Deviations are limited to what the web needs — focus rings,
   responsive stacking, loading states — and are commented where they occur.
+- **Assumptions live in one file.** Anything not present in the client's `seed/*.json` is in
+  `lib/seed/assumptions.ts`, with the reasoning, so it can be reviewed and replaced.
+
+## Import format
+
+`/app/recipes/import` takes two kinds of CSV. Download a template from that screen rather
+than typing the headers by hand. Nothing is written until you have seen the dry run, and a
+file with any error writes nothing at all.
+
+**Ingredients** — `name,unit,pack_size,cost_per_unit,supplier`
+
+- `unit` must be one of `kg`, `L`, `each`, `dozen`
+- `cost_per_unit` is per unit, not per pack; dollar signs and thousands separators are fine
+- A supplier that does not exist yet is created by name, with no contact email
+- A name that already exists is **overwritten**, and its cost timestamp is restamped
+
+**Recipes** — `recipe,yield_portions,ingredient,qty`
+
+- One row per ingredient; repeat the recipe name and yield on each of its rows
+- Every row for one recipe must agree on `yield_portions`
+- `ingredient` must match an existing ingredient name — import ingredients first
+- A recipe that already exists has its ingredient list **replaced**, not merged
+
+## Testing
+
+```bash
+npm test
+```
+
+Three suites:
+
+- **Engine** — every calculation, checked against golden values produced by running the
+  approved mockup's own functions over its own data. If a number here changes, the app has
+  stopped agreeing with the design.
+- **CSV import** — parsing and row-level validation.
+- **Migration and seed** — runs the real migration and the real seed against an in-process
+  Postgres (PGlite, a devDependency; nothing in the app imports it). This proves the
+  generated SQL is valid, that the seed is idempotent, and that a price change propagates
+  everywhere while a sent quote's snapshot stays frozen.
 
 ## Build status
 
 - [x] **Phase 0** — scaffold, auth, shell, proposed schema
-- [ ] **Phase 1** — migrations, seed, catalogue admin, CSV import
+- [x] **Phase 1** — migration, seed, calculation engine, catalogue admin, CSV import
 - [ ] **Phase 2** — quote builder
 - [ ] **Phase 3** — client-facing quote + PDF
 - [ ] **Phase 4** — ordering
 - [ ] **Phase 5** — handover polish
 
-No migration has been generated yet — the schema in `lib/db/schema.ts` is awaiting sign-off.
+The initial migration is in `drizzle/0000_init.sql`. It has been run against an in-process
+Postgres in the test suite, but not yet against a real Supabase project.

@@ -1,12 +1,12 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
 
 type Database = ReturnType<typeof build>;
 
 declare global {
   // eslint-disable-next-line no-var
-  var __ueSql: ReturnType<typeof postgres> | undefined;
+  var __uePool: Pool | undefined;
   // eslint-disable-next-line no-var
   var __ueDb: Database | undefined;
 }
@@ -19,10 +19,14 @@ function build() {
         "Supabase connection string.",
     );
   }
-  // Reuse the connection across hot reloads in dev so we don't exhaust the pool.
-  // `prepare: false` is required by Supabase's transaction pooler.
-  const sql = (globalThis.__ueSql ??= postgres(url, { prepare: false }));
-  return drizzle(sql, { schema, casing: "snake_case" });
+
+  // Reuse the pool across hot reloads in dev so we don't exhaust connections.
+  const pool = (globalThis.__uePool ??= new Pool({
+    connectionString: url,
+    max: Number(process.env.DATABASE_POOL_MAX ?? 10),
+  }));
+
+  return drizzle(pool, { schema, casing: "snake_case" });
 }
 
 export function getDb(): Database {

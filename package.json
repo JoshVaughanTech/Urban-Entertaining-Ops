@@ -19,13 +19,14 @@
     "@supabase/supabase-js": "^2.47.10",
     "drizzle-orm": "^0.38.3",
     "next": "^15.1.4",
-    "postgres": "^3.4.5",
+    "pg": "^8.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^22.10.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.3",
     "dotenv": "^16.4.7",

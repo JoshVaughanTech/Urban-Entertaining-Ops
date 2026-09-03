@@ -1,0 +1,97 @@
+.field {
+  margin-bottom: 12px;
+}
+
+.label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 11.5px;
+  margin: 4px 0 0;
+}
+
+.control {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  background: #FBFAF7;
+}
+
+.control:focus {
+  outline: 2px solid var(--green);
+  outline-offset: -1px;
+}
+
+.control:disabled {
+  opacity: 0.6;
+}
+
+.invalid {
+  border-color: var(--red);
+}
+
+.error {
+  color: var(--red);
+  font-size: 11.5px;
+  margin: 4px 0 0;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toggle input {
+  width: auto;
+}
+
+.narrow {
+  max-width: 520px;
+}
+
+.formError {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid #E2C4BD;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.formOk {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid #CBDBD0;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 600px) {
+  .row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

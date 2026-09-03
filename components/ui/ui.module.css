@@ -108,3 +108,158 @@
   padding: 1px 4px;
   border-radius: 3px;
 }
+
+/* ── tables ─────────────────────────────────────────────────────────── */
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalRow td {
+  border-bottom: 0;
+  border-top: 2px solid var(--ink);
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Supplier / group heading inside a table. */
+.groupRow {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  padding: 16px 8px 6px;
+}
+
+.groupMeta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* ── stats ──────────────────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.statLabel {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 600;
+  display: block;
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* ── chips / tabs ───────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 5px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.chipOn {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* ── odds and ends ──────────────────────────────────────────────────── */
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 11.5px;
+}
+
+.cardGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.cardGridNarrow {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.tierRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.tier {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.tierPrice {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  display: block;
+}
+
+.cardGap {
+  margin-top: 18px;
+}

@@ -2,8 +2,8 @@
  * Safe to re-run: every catalogue row upserts on its slug. */
 
 import { config } from "dotenv";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 import { seedDatabase } from "@/lib/seed/run";
 
@@ -19,8 +19,8 @@ async function main() {
     process.exit(1);
   }
 
-  const client = postgres(url, { prepare: false, max: 1 });
-  const db = drizzle(client, { casing: "snake_case" });
+  const pool = new Pool({ connectionString: url, max: 1 });
+  const db = drizzle(pool, { casing: "snake_case" });
 
   try {
     const report = await seedDatabase(db);
@@ -30,7 +30,7 @@ async function main() {
     }
     console.log("\nRe-running this is safe — catalogue rows upsert on their slug.");
   } finally {
-    await client.end();
+    await pool.end();
   }
 }
 
