@@ -1,5 +1,6 @@
 import {
   boolean,
+  date,
   check,
   index,
   integer,
@@ -154,6 +155,14 @@ export const packages = pgTable("packages", {
   staffPerGuests: integer("staff_per_guests"),
   serviceHours: numeric("service_hours", { precision: 4, scale: 1 }).notNull(),
   includes: text("includes").array().notNull().default(emptyTextArray),
+  /* PROPOSED — awaiting Josh's sign-off, see the Phase 0 review notes.
+     Diets the kitchen can substitute for inside this package even though no
+     listed menu item carries the tag. Without it, honest dietary tags on the
+     seed block far more packages than the mockup does: the mockup blocks only
+     vegan + grazing, and its own copy ("Grazing has no vegan build yet")
+     implies the other packages are adaptable. Drop this column if that
+     reading is wrong. */
+  adaptableDietary: dietaryEnum("adaptable_dietary").array().notNull().default(emptyDietaryArray),
   active: boolean("active").notNull().default(true),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -224,7 +233,7 @@ export const events = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     clientName: text("client_name").notNull(),
     contactEmail: text("contact_email"),
-    eventDate: text("event_date").notNull(),
+    eventDate: date("event_date", { mode: "string" }).notNull(),
     guests: integer("guests").notNull(),
     style: styleEnum("style"),
     durationHours: numeric("duration_hours", { precision: 4, scale: 1 }).notNull(),
@@ -301,8 +310,8 @@ export const quoteLines = pgTable(
 
 export const orders = pgTable("orders", {
   id: uuid("id").primaryKey().defaultRandom(),
-  windowFrom: text("window_from").notNull(),
-  windowTo: text("window_to").notNull(),
+  windowFrom: date("window_from", { mode: "string" }).notNull(),
+  windowTo: date("window_to", { mode: "string" }).notNull(),
   status: orderStatusEnum("status").notNull().default("draft"),
   createdBy: uuid("created_by").references(() => appUsers.id, { onDelete: "set null" }),
   createdAt: createdAt(),
