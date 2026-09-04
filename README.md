@@ -257,4 +257,3 @@ Tracked here so nothing is quietly assumed:
 | UE logo | Placeholder box on the quote and PDF | `QuoteDocumentView.tsx`, `QuotePdf.tsx` |
 | Cormorant Garamond + Mulish `.ttf` | PDF falls back to Times/Helvetica | `registerBrandFonts()` |
 | Real staff cost and charge-out rates | Seeded from the mockup: $48 and $76.80 | `/app/settings` |
-| Which packages can be adapted for which diets | Seeded as "all except vegan on grazing" | `/app/packages` |

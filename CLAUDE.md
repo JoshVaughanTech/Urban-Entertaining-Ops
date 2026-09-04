@@ -111,11 +111,19 @@ What is refused is relabelling back into a state that is entered by *doing* some
 by writing the quote, sent by sending it. Confirming a draft freezes a snapshot, because a
 confirmed quote must render from one.
 
+## Dietary fit
+
+A package satisfies a dietary requirement if a listed menu item carries the tag **or** the
+package is marked adaptable for it (`packages.adaptable_dietary`). Confirmed by the client,
+4 September 2026: every package adapts for everything except vegan on the grazing table, so
+that is the only combination the fit checker blocks. Seeded in `lib/seed/assumptions.ts`,
+editable per package at `/app/packages`.
+
+The seed's menu items carry no tags of their own — capability lives on the package, because
+it is what the kitchen can cook rather than a property of a listed dish.
+
 ## Open questions — do not silently resolve these
 
-- **`packages.adaptable_dietary`** was added so the fit checker matches the mockup, which
-  blocks only vegan on grazing. The seed assumes every package can be adapted for every diet
-  except that one. Real per-package capability is still unconfirmed.
 - **No database-backed screen has ever been rendered.** The app has been built without
   Supabase credentials. Logic is heavily tested; the UI is typechecked and builds, but
   unreviewed. Treat any claim about how a screen *looks* as unverified.

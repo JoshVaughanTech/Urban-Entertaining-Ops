@@ -33,19 +33,16 @@ export const SETTINGS = {
 } as const;
 
 /* ── dietary capability ─────────────────────────────────────────────────
-   ASSUMPTION, needs Josh's confirmation.
+   Confirmed by Josh, 4 September 2026: every package can be adapted for
+   every dietary requirement, except that the grazing table cannot do vegan.
 
-   `seed/menu_items.json` carries no dietary tags at all, so on the letter of
-   the data model no package can satisfy any dietary requirement. The mockup,
-   however, blocks exactly one combination — vegan on the grazing table — and
-   words it "Grazing has no vegan build yet", which says the other packages
-   *do* have builds for it.
+   Menu item tags stay empty, because `seed/menu_items.json` carries none and
+   because this is a kitchen capability rather than a property of any one
+   listed dish — the mockup words it "Grazing has no vegan build yet". So
+   packages.adaptable_dietary is what the fit checker reads, and it is what
+   blocks vegan on grazing and nothing else.
 
-   So menu item tags stay empty (that is what the data says) and package-level
-   adaptability carries the behaviour: every package can be adapted for every
-   diet, except grazing, which cannot do vegan. That reproduces the mockup
-   exactly. Replace this with the real per-package capability once Josh
-   confirms which packages genuinely have which builds. */
+   Change it here for the seed, or per package at /app/packages. */
 
 const ALL_DIETS: DietaryTag[] = ["vegetarian", "vegan", "gf", "df", "halal", "nut_free"];
 
