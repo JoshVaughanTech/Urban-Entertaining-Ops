@@ -67,6 +67,9 @@ DATABASE_IDLE_TIMEOUT=0
 
 Signing in still needs a real Supabase project — this covers the data, not the auth.
 
+The local database serves **one connection at a time**, so stop `npm run dev` before running
+a build or another seed against it, or they will fail with ECONNRESET.
+
 ## Commands
 
 | Command | What it does |
@@ -80,6 +83,8 @@ Signing in still needs a real Supabase project — this covers the data, not the
 | `npm run db:studio` | Browse the database |
 | `npm run db:seed` | Load `seed/*.json` — safe to re-run |
 | `npm run db:dev` | A local Postgres for development, migrated and seeded |
+| `npm run db:dev:demo` | The same, plus a demo book of 15 quotes |
+| `npm run db:demo` | Load the demo quotes into a real database |
 
 ## Layout
 

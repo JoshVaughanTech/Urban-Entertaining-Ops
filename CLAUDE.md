@@ -94,6 +94,13 @@ Without those the pool opens a second connection, or retires and reopens an idle
 the socket server resets it. Auth still needs a real Supabase project — the local database
 covers the data, not the sign-in.
 
+`npm run db:dev:demo` seeds a fuller book of work as well: 15 quotes across every status,
+dated relative to today. `npm run db:demo` does the same against a real database.
+
+**One connection means one client.** Anything else that wants the local database — a build,
+`db:seed`, `db:demo` — fails with ECONNRESET while `npm run dev` is running. Stop the dev
+server first, or expect the odd transient build failure. Supabase has no such limit.
+
 ## Testing
 
 ```bash
