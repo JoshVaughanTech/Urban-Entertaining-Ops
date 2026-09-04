@@ -308,15 +308,21 @@ export const quoteLines = pgTable(
 
 /* ── ordering ──────────────────────────────────────────────────────────── */
 
-export const orders = pgTable("orders", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  windowFrom: date("window_from", { mode: "string" }).notNull(),
-  windowTo: date("window_to", { mode: "string" }).notNull(),
-  status: orderStatusEnum("status").notNull().default("draft"),
-  createdBy: uuid("created_by").references(() => appUsers.id, { onDelete: "set null" }),
-  createdAt: createdAt(),
-  updatedAt: updatedAt(),
-});
+export const orders = pgTable(
+  "orders",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    windowFrom: date("window_from", { mode: "string" }).notNull(),
+    windowTo: date("window_to", { mode: "string" }).notNull(),
+    status: orderStatusEnum("status").notNull().default("draft"),
+    createdBy: uuid("created_by").references(() => appUsers.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  /* One order per delivery window — "the shopping for these dates". Makes the
+     lookup deterministic and stops two half-ticked orders existing at once. */
+  (t) => [uniqueIndex("orders_window_idx").on(t.windowFrom, t.windowTo)],
+);
 
 export const orderLines = pgTable(
   "order_lines",

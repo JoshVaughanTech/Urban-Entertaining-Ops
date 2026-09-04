@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "orders_window_idx" ON "orders" USING btree ("window_from","window_to");

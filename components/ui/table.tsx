@@ -26,8 +26,15 @@ export function GroupRow({ label, meta, span }: { label: string; meta?: string; 
   );
 }
 
-export function Stats({ children }: { children: ReactNode }) {
-  return <div className={styles.stats}>{children}</div>;
+export function Stats({ children, columns }: { children: ReactNode; columns?: number }) {
+  return (
+    <div
+      className={styles.stats}
+      style={columns ? { gridTemplateColumns: `repeat(${columns}, 1fr)` } : undefined}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function Stat({

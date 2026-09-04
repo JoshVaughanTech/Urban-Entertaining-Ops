@@ -64,6 +64,7 @@ explains what is missing. No key is ever faked or defaulted.
 | `npm test` | Vitest — engine, CSV import, quote lifecycle, migration and seed |
 | `npm run db:generate` | Generate a migration from `lib/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
+| `npm run db:studio` | Browse the database |
 | `npm run db:seed` | Load `seed/*.json` — safe to re-run |
 
 ## Layout
@@ -127,7 +128,7 @@ file with any error writes nothing at all.
 npm test
 ```
 
-Five suites:
+Seven suites:
 
 - **Engine** — every calculation, checked against golden values produced by running the
   approved mockup's own functions over its own data. If a number here changes, the app has
@@ -137,6 +138,11 @@ Five suites:
   the allowed status transitions, and a sent snapshot that does not move when prices do.
 - **Client document and PDF** — what the client sees, built from the snapshot once sent,
   plus a real PDF render and the public-link rules.
+- **Purchase-order CSV** — quoting, escaping, and a round trip back through the importer's
+  own parser, so the two CSV modules cannot drift apart.
+- **Ordering** — the seed's two confirmed September events rolled up through the database
+  and checked line by line against the mockup, plus tick persistence and the
+  supplier-without-an-email path.
 - **Migration and seed** — runs the real migration and the real seed against an in-process
   Postgres (PGlite, a devDependency; nothing in the app imports it). This proves the
   generated SQL is valid, that the seed is idempotent, and that a price change propagates
@@ -148,7 +154,7 @@ Five suites:
 - [x] **Phase 1** — migration, seed, calculation engine, catalogue admin, CSV import
 - [x] **Phase 2** — quote builder, quote list, status lifecycle, snapshot on send
 - [x] **Phase 3** — client preview, branded PDF, send via Resend, public link
-- [ ] **Phase 4** — ordering
+- [x] **Phase 4** — ordering: rollup by supplier, persisted ticks, CSV export, purchase orders
 - [ ] **Phase 5** — handover polish
 
 The initial migration is in `drizzle/0000_init.sql`. It has been run against an in-process
@@ -172,3 +178,28 @@ bounced.
 - **PDF fonts** are the built-in Times-Roman and Helvetica, standing in for Cormorant
   Garamond and Mulish. `@react-pdf` needs font *files*, not a webfont stylesheet. Follow the
   three steps in `registerBrandFonts()` in `lib/pdf/QuotePdf.tsx` once the `.ttf` files exist.
+
+## Ordering
+
+`/app/ordering` takes a date window, finds the **confirmed** quotes inside it, and rolls
+their packages down through menu items and recipes to ingredients:
+
+```
+batches = portions_per_head × guests / yield_portions
+needed  = Σ qty × batches
+packs   = ceil(needed / pack_size)
+```
+
+This uses **live** ingredient costs and pack sizes — deliberately the opposite of a quote,
+which renders from its frozen snapshot. The snapshot fixes the price the client was given;
+it has nothing to do with what the kitchen has to buy this week.
+
+An `orders` row is opened lazily, the first time a line is ticked, and there is one per
+delivery window. Re-syncing the rollup keeps existing ticks and drops lines that have left
+the window. Each supplier gets its own CSV — the same text whether downloaded from the
+screen or attached to a purchase order, so the office and the supplier never hold different
+sheets.
+
+Suppliers with no `contact_email` are **never silently skipped**: they are labelled in the
+table, named in the confirm dialog before anything sends, and listed again in the result.
+All six seeded suppliers are in that state until real addresses arrive.
