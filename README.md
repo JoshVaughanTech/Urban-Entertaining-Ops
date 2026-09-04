@@ -34,6 +34,7 @@ cp .env.local.example .env.local
 | `DATABASE_URL` | Supabase → Project Settings → Database → Connection string (URI) |
 | `DATABASE_POOL_MAX` | Optional. Connection pool size, default 10 |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` in dev; the Vercel URL in production |
+| `ALLOWED_EMAILS` | Who may sign in before anyone is added in-app. Comma separated |
 | `RESEND_API_KEY` | resend.com — sending client quotes |
 | `QUOTE_FROM_EMAIL` | A sender on a domain verified in Resend |
 
@@ -114,6 +115,8 @@ seed/*.json          placeholder catalogue data, exactly as delivered
 - **Money is integer cents.** Quantities are `numeric(10,3)`. Format for display only.
 - **The engine is pure.** `lib/engine/` has no DB access and is unit tested. The UI never
   does arithmetic the engine could do.
+- **Signing in is not the same as being allowed in.** `app_users` is an allowlist and
+  `requireUser()` checks it every request; `/app/team` manages it.
 - **No server action without an auth check.** `/q/[token]` is the only public route, and it
   serves a sent quote from its snapshot — never a draft, never a cancelled quote.
 - **The mockup is the design.** Deviations are limited to what the web needs — focus rings,

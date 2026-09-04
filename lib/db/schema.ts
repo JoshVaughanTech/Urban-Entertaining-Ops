@@ -57,16 +57,27 @@ const emptyTextArray = sql`'{}'::text[]`;
 const emptyDietaryArray = sql`'{}'::dietary_tag[]`;
 
 /* ── people ────────────────────────────────────────────────────────────
-   Mirrors auth.users. No FK: Supabase owns the auth schema and Drizzle
-   migrations should not reach into it. Rows are created on first login. */
+   This table is the allowlist. Holding a valid Supabase session is not
+   enough to use the app — there has to be a row here, matched on email.
 
-export const appUsers = pgTable("app_users", {
-  id: uuid("id").primaryKey(),
-  email: text("email").notNull().unique(),
-  name: text("name"),
-  role: roleEnum("role").notNull().default("staff"),
-  createdAt: createdAt(),
-});
+   `id` is the app's own id so a person can be added before they have ever
+   signed in; `authUserId` is their Supabase id and binds on first sign-in.
+   No FK to auth.users: Supabase owns that schema and Drizzle migrations
+   should not reach into it. */
+
+export const appUsers = pgTable(
+  "app_users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    authUserId: uuid("auth_user_id").unique(),
+    email: text("email").notNull().unique(),
+    name: text("name"),
+    role: roleEnum("role").notNull().default("staff"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index("app_users_auth_idx").on(t.authUserId)],
+);
 
 /* ── catalogue ─────────────────────────────────────────────────────────
    `slug` is the stable human key the seed and the tests address rows by

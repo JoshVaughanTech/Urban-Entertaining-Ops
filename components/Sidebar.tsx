@@ -19,6 +19,7 @@ const SECONDARY: NavItem[] = [
   { href: "/app/packages", label: "Packages" },
   { href: "/app/recipes", label: "Recipes" },
   { href: "/app/settings", label: "Settings" },
+  { href: "/app/team", label: "Access" },
 ];
 
 function isActive(pathname: string, href: string) {

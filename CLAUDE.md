@@ -48,6 +48,9 @@ wrapper over it.
 - **The engine is pure and tested.** The UI must not do arithmetic the engine could do.
 - **Every exported server action calls `requireUser()` first.** Middleware is not an
   authorisation boundary on its own. `/q/[token]` is the only public route.
+- **Authentication is not authorisation.** A Supabase session only proves someone owns an
+  email address — anyone can get one. `app_users` is the allowlist, and `requireUser()`
+  checks it on every request. Admin-only work calls `requireAdmin()`. See **Access** below.
 - **Assumptions live in `lib/seed/assumptions.ts`.** The client's `seed/*.json` is untouched
   as delivered. Anything derived or inferred goes in that one file with its reasoning.
 - **Never fabricate** env values, API keys, supplier emails or client data. If something is
@@ -131,6 +134,24 @@ noted in the code at the point of conflict.
 Don't redesign. Deviate only where the web genuinely needs it — focus rings, responsive
 stacking, loading states — and comment where you do. The mockup's palette in
 `app/globals.css` is the palette, not a suggestion.
+
+## Access
+
+`app_users` is the allowlist: no row, no entry, whatever address someone signs in with.
+People can be added by email before they have ever signed in — `id` is the app's own id and
+`auth_user_id` binds on their first sign-in.
+
+Three ways in, checked in order: already bound by Supabase id; added by email and binding
+now; or listed in `ALLOWED_EMAILS`. If the table is empty *and* `ALLOWED_EMAILS` is unset,
+the first person to sign in becomes admin — otherwise a fresh deployment would be unusable —
+and it closes behind them.
+
+The last admin cannot be removed or demoted, by anyone including themselves. Without that
+guard one click leaves nobody able to manage access and no way back except editing the
+database by hand.
+
+Managed at `/app/team`. Rejected users land on `/no-access`, which is public by design and
+shows nothing.
 
 ## Quote status
 

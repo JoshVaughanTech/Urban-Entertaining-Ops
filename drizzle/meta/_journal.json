@@ -15,6 +15,13 @@
       "when": 1788484884057,
       "tag": "0001_order_window_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788504057560,
+      "tag": "0002_app_users_allowlist",
+      "breakpoints": true
     }
   ]
 }
