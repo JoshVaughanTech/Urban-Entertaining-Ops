@@ -144,9 +144,17 @@ People can be added by email before they have ever signed in — `id` is the app
 `auth_user_id` binds on their first sign-in.
 
 Three ways in, checked in order: already bound by Supabase id; added by email and binding
-now; or listed in `ALLOWED_EMAILS`. If the table is empty *and* `ALLOWED_EMAILS` is unset,
-the first person to sign in becomes admin — otherwise a fresh deployment would be unusable —
-and it closes behind them.
+now; or listed in `ALLOWED_EMAILS`. If **nobody can administer the list** and
+`ALLOWED_EMAILS` is unset, the first person to sign in becomes admin — otherwise a fresh
+deployment would be unusable — and it closes as soon as there is an admin.
+
+That condition is *no admins*, not *no rows*, and the difference is a real lockout: adding a
+single viewer to an empty table leaves rows but nobody who can manage them, so an
+"is the table empty" test shuts the door with nobody inside. That happened once, on the day
+the demo account was added.
+
+`npm run user:add -- <email> <role>` grants access without the Access screen, for a fresh
+deployment or an office whose last admin has left.
 
 Three roles. **admin** manages access; **staff** quote and order; **viewer** is read-only —
 it sees every screen and changes nothing, which is what makes a demo account safe to hand

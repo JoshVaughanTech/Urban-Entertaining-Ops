@@ -85,12 +85,19 @@ export async function resolveMember(
 
   const allowed = bootstrapEmails();
 
-  const [anyMember] = await db.select({ id: s.appUsers.id }).from(s.appUsers).limit(1);
-  const tableIsEmpty = anyMember === undefined;
+  /* The bootstrap turns on when nobody can administer the list — not merely
+     when the table is empty. Those differ: adding a single viewer to an empty
+     table leaves rows but no admin, and an "is it empty" test would slam the
+     door with nobody inside. The last-admin guard means the only ways to
+     reach zero admins are a fresh deployment or a hand-edited database. */
+  const [anyAdmin] = await db
+    .select({ id: s.appUsers.id })
+    .from(s.appUsers)
+    .where(eq(s.appUsers.role, "admin"))
+    .limit(1);
 
-  /* With no members and no ALLOWED_EMAILS there is no way into a fresh
-     deployment, so the first person through the door becomes admin. */
-  const firstEver = tableIsEmpty && allowed.length === 0;
+  const noOneCanAdminister = anyAdmin === undefined;
+  const firstEver = noOneCanAdminister && allowed.length === 0;
 
   if (!allowed.includes(email) && !firstEver) return null;
 

@@ -48,6 +48,22 @@ describe("the bootstrap", () => {
     expect(member!.role).toBe("admin");
   });
 
+  /* The bug this guards against: adding a viewer to an empty table left rows
+     but no admin, and an "is the table empty" bootstrap then locked
+     everyone out with nobody inside. */
+  it("still lets an admin in when the only member so far cannot administer", async () => {
+    await addMember(db, "demo@example.com", "viewer", "Demo");
+
+    const owner = await resolveMember(db, AUTH_A, "owner@example.com");
+    expect(owner, "a table with no admin must not be a locked door").not.toBeNull();
+    expect(owner!.role).toBe("admin");
+  });
+
+  it("closes once somebody can administer", async () => {
+    await addMember(db, "boss@example.com", "admin", null);
+    expect(await resolveMember(db, AUTH_B, "stranger@example.com")).toBeNull();
+  });
+
   it("closes behind them — the second stranger is refused", async () => {
     await resolveMember(db, AUTH_A, "josh@urbanentertaining.example");
     expect(await resolveMember(db, AUTH_B, "stranger@example.com")).toBeNull();
