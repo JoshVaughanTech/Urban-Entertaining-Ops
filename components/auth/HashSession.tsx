@@ -70,6 +70,17 @@ export function HashSession({ children }: { children: React.ReactNode }) {
         });
         if (setErr) throw setErr;
 
+        /* Confirm the server accepts it before sending anyone anywhere.
+           setSession succeeding only means the browser stored a cookie; if
+           the server will not read it back, redirecting bounces them to the
+           sign-in form with no explanation, which is the single most
+           confusing way this can fail. */
+        const res = await fetch("/auth/whoami", { cache: "no-store" });
+        const who = (await res.json()) as { signedIn?: boolean };
+        if (!who.signedIn) {
+          throw new Error("the browser stored the session but the server did not accept it");
+        }
+
         /* A full navigation, not a router push: the cookie has only just been
            written, and nothing but a fresh request will carry it to the
            server. replace() rather than assign() so the tokens do not stay
