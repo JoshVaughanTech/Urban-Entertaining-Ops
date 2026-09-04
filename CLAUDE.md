@@ -110,7 +110,7 @@ server first, or expect the odd transient build failure. Supabase has no such li
 npm test
 ```
 
-Ten suites, all runnable with no credentials and no network:
+Eleven suites, all runnable with no credentials and no network:
 
 - **Engine** — checked against golden values produced by running the approved mockup's own
   functions over its own data. If a number here changes, the app has stopped agreeing with
@@ -118,12 +118,14 @@ Ten suites, all runnable with no credentials and no network:
 - **Migration and seed, quote lifecycle, ordering** — run the real migration and the real
   seed against an in-process Postgres (PGlite, a devDependency; nothing in the app imports
   it). This is how schema and SQL get verified without a Supabase project.
-- **Form validation, quote payload, public routes** — the three trust boundaries.
+- **Form validation, quote payload, public routes, access** — the trust boundaries. The
+  access suite covers who gets in, and that the last admin cannot be removed.
 - **CSV import and purchase-order CSV** — including a round trip through the importer's own
   parser, so the two CSV modules cannot drift apart.
 
 Migrations are generated, never hand-written: edit `lib/db/schema.ts`, then
-`npm run db:generate`. Two exist so far (`0000_init`, `0001_order_window_unique`).
+`npm run db:generate`. Three so far: `0000_init`, `0001_order_window_unique`,
+`0002_app_users_allowlist`.
 
 ## Design
 
