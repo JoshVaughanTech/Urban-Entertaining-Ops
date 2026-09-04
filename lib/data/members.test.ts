@@ -154,6 +154,26 @@ describe("managing the list", () => {
     await expect(removeMember(db, second.id)).rejects.toThrow(/last admin/);
   });
 
+  it("can make someone read-only, and back again", async () => {
+    const demo = await addMember(db, "demo@example.com", "viewer", "Demo");
+    expect(demo.role).toBe("viewer");
+
+    // A viewer still gets in — they are on the list, they just cannot change
+    // anything, which every write action enforces separately.
+    const resolved = await resolveMember(db, AUTH_B, "demo@example.com");
+    expect(resolved!.role).toBe("viewer");
+
+    await setMemberRole(db, demo.id, "staff");
+    expect((await listMembers(db)).find((m) => m.id === demo.id)!.role).toBe("staff");
+  });
+
+  it("does not count a viewer as an admin for the last-admin guard", async () => {
+    await addMember(db, "demo@example.com", "viewer", null);
+    const owner = (await listMembers(db)).find((m) => m.email === "owner@example.com")!;
+    // Still the only admin, so still protected.
+    await expect(removeMember(db, owner.id)).rejects.toThrow(/last admin/);
+  });
+
   it("can promote staff to admin", async () => {
     const chef = await addMember(db, "chef@example.com", "staff", null);
     await setMemberRole(db, chef.id, "admin");

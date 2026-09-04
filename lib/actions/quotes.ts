@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireUser } from "@/lib/auth";
+import { denyReadOnly, requireUser } from "@/lib/auth";
 import { loadCatalogue, loadSettings } from "@/lib/data/catalogue";
 import {
   QuoteError,
@@ -33,6 +33,8 @@ const message = (err: unknown) =>
 
 export async function saveQuoteDraft(_prev: ActionState, data: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
 
   let destination: string;
 
@@ -59,6 +61,8 @@ export async function saveQuoteDraft(_prev: ActionState, data: FormData): Promis
 
 export async function markQuoteStatus(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
 
   const id = String(data.get("id") ?? "");
   const next = String(data.get("status") ?? "") as QuoteStatus;
@@ -79,6 +83,8 @@ export async function markQuoteStatus(_prev: ActionState, data: FormData): Promi
 
 export async function deleteQuoteDraft(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
 
   try {
@@ -98,6 +104,8 @@ export async function saveAndPreviewQuote(
   data: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
 
   let destination: string;
 

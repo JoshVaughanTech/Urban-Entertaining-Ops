@@ -28,8 +28,9 @@ export function InviteForm() {
         </Field>
         <Field label="Access" htmlFor="role">
           <Select id="role" name="role" defaultValue="staff">
-            <option value="staff">Staff</option>
-            <option value="admin">Admin — can manage access</option>
+            <option value="staff">Staff — can quote and order</option>
+            <option value="viewer">Read-only — can look, change nothing</option>
+            <option value="admin">Admin — can also manage access</option>
           </Select>
         </Field>
       </Row>
@@ -41,32 +42,33 @@ export function InviteForm() {
   );
 }
 
-export function RoleToggle({
+export function RoleSelect({
   id,
   role,
-  disabled,
+  lastAdmin,
 }: {
   id: string;
-  role: "admin" | "staff";
-  disabled: boolean;
+  role: "admin" | "staff" | "viewer";
+  lastAdmin: boolean;
 }) {
   const [state, action] = useActionState(changeMemberRole, idle);
-  const next = role === "admin" ? "staff" : "admin";
 
   return (
     <>
       {state.message && !state.ok ? <FormError>{state.message}</FormError> : null}
       <form action={action}>
         <input type="hidden" name="id" value={id} />
-        <input type="hidden" name="role" value={next} />
-        <button
-          type="submit"
-          className={buttonClass("ghost")}
-          style={{ padding: "4px 10px" }}
-          disabled={disabled}
+        <Select
+          name="role"
+          defaultValue={role}
+          disabled={lastAdmin}
+          aria-label="Access level"
+          onChange={(e) => e.currentTarget.form?.requestSubmit()}
         >
-          Make {next}
-        </button>
+          <option value="admin">Admin</option>
+          <option value="staff">Staff</option>
+          <option value="viewer">Read-only</option>
+        </Select>
       </form>
     </>
   );

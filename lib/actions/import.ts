@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 
-import { requireUser } from "@/lib/auth";
+import { denyReadOnly, requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { parseIngredientCsv, parseRecipeCsv, type RowIssue } from "@/lib/import/csv";
@@ -49,6 +49,14 @@ export async function commitImport(_prev: ImportState, data: FormData): Promise<
 
   const kind = kindOf(data);
   const csv = String(data.get("csv") ?? "");
+
+  /* Previewing is allowed for everyone — it validates a file and writes
+     nothing. Committing is not. */
+  const denied = await denyReadOnly();
+  if (denied) {
+    return { stage: "preview", kind, csv, rows: [], issues: [], message: denied.message };
+  }
+
   const plan = await buildPlan(kind, csv);
 
   if (plan.issues.length > 0) {

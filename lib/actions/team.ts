@@ -14,7 +14,8 @@ const message = (err: unknown) =>
       ? err.message
       : "Could not change access.";
 
-const role = (value: FormDataEntryValue | null) => (value === "admin" ? "admin" : "staff");
+const role = (value: FormDataEntryValue | null): "admin" | "staff" | "viewer" =>
+  value === "admin" ? "admin" : value === "viewer" ? "viewer" : "staff";
 
 export async function inviteMember(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireAdmin();

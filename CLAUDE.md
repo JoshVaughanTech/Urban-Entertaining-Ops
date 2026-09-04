@@ -125,7 +125,7 @@ Eleven suites, all runnable with no credentials and no network:
 
 Migrations are generated, never hand-written: edit `lib/db/schema.ts`, then
 `npm run db:generate`. Three so far: `0000_init`, `0001_order_window_unique`,
-`0002_app_users_allowlist`.
+`0002_app_users_allowlist`, `0003_viewer_role`.
 
 ## Design
 
@@ -147,6 +147,12 @@ Three ways in, checked in order: already bound by Supabase id; added by email an
 now; or listed in `ALLOWED_EMAILS`. If the table is empty *and* `ALLOWED_EMAILS` is unset,
 the first person to sign in becomes admin — otherwise a fresh deployment would be unusable —
 and it closes behind them.
+
+Three roles. **admin** manages access; **staff** quote and order; **viewer** is read-only —
+it sees every screen and changes nothing, which is what makes a demo account safe to hand
+out. Every action that writes or sends calls `denyReadOnly()`; the only unguarded one is
+`previewImport`, which validates an uploaded file and writes nothing. A viewer especially
+cannot email a client or a supplier.
 
 The last admin cannot be removed or demoted, by anyone including themselves. Without that
 guard one click leaves nobody able to manage access and no way back except editing the

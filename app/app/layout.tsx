@@ -15,9 +15,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         Skip to content
       </a>
       <Sidebar email={user.email} />
-      <main id="main" className={styles.main} tabIndex={-1}>
-        {children}
-      </main>
+      <div className={styles.column}>
+        {user.role === "viewer" ? (
+          <div className={styles.readOnly} role="status">
+            Read-only access — you can look at everything and change nothing.
+          </div>
+        ) : null}
+        <main id="main" className={styles.main} tabIndex={-1}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

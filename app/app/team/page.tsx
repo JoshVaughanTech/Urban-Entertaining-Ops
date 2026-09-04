@@ -1,5 +1,5 @@
 import { SetupNotice } from "@/components/SetupNotice";
-import { InviteForm, RevokeButton, RoleToggle } from "@/components/forms/TeamForms";
+import { InviteForm, RevokeButton, RoleSelect } from "@/components/forms/TeamForms";
 import { Card, PageHeader, Tag } from "@/components/ui";
 import { Table, ui } from "@/components/ui/table";
 import { requireAdmin } from "@/lib/auth";
@@ -63,10 +63,10 @@ export default async function TeamPage() {
                     {m.id === me.id ? " · you" : ""}
                   </td>
                   <td className={ui.num}>
-                    <RoleToggle
+                    <RoleSelect
                       id={m.id}
                       role={m.role}
-                      disabled={m.role === "admin" && admins <= 1}
+                      lastAdmin={m.role === "admin" && admins <= 1}
                     />
                   </td>
                   <td className={ui.num}>

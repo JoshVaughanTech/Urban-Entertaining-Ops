@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireUser } from "@/lib/auth";
+import { denyReadOnly, requireUser } from "@/lib/auth";
 import {
   OrderError,
   buildOrdering,
@@ -35,6 +35,8 @@ const message = (err: unknown) =>
  *  writes the current rollup into it, then records the tick. */
 export async function toggleOrderLine(_prev: ActionState, data: FormData): Promise<ActionState> {
   const user = await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
 
   try {
     const { from, to } = readWindow(data);
@@ -68,6 +70,8 @@ export async function sendPurchaseOrders(
   data: FormData,
 ): Promise<SendOrdersResult> {
   const user = await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
 
   let sent: string[] = [];
   let skipped: string[] = [];

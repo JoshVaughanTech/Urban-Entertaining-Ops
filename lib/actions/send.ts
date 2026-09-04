@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireUser } from "@/lib/auth";
+import { denyReadOnly, requireUser } from "@/lib/auth";
 import { loadCatalogue, loadSettings } from "@/lib/data/catalogue";
 import { loadQuote } from "@/lib/data/quotes";
 import { QuoteError, markSent, prepareSend, sendQuote } from "@/lib/data/quotes-write";
@@ -87,6 +87,8 @@ export async function sendQuoteToClient(
   data: FormData,
 ): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
 
   try {
@@ -138,6 +140,8 @@ export async function markSentWithoutEmail(
   data: FormData,
 ): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
 
   try {

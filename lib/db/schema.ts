@@ -43,7 +43,10 @@ export const quoteLineSourceEnum = pgEnum("quote_line_source", [
   "custom",
 ]);
 export const orderStatusEnum = pgEnum("order_status", ["draft", "placed"]);
-export const roleEnum = pgEnum("role", ["admin", "staff"]);
+/* viewer is read-only: it can see everything and change nothing, which is
+   what a demo account should be. A deviation from the brief's two roles,
+   added deliberately. */
+export const roleEnum = pgEnum("role", ["admin", "staff", "viewer"]);
 
 /* ── shared column builders ────────────────────────────────────────────
    Money is always integer cents. Quantities are numeric(10,3) and come

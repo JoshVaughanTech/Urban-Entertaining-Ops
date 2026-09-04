@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
-import { requireUser } from "@/lib/auth";
+import { denyReadOnly, requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { DIETARY_TAGS, STYLES } from "@/lib/engine/types";
@@ -25,6 +25,8 @@ function revalidateCatalogue() {
 
 export async function saveSupplier(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -52,6 +54,8 @@ export async function saveSupplier(_prev: ActionState, data: FormData): Promise<
 
 export async function deleteSupplier(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No supplier to delete.");
 
@@ -73,6 +77,8 @@ export async function deleteSupplier(_prev: ActionState, data: FormData): Promis
 
 export async function saveIngredient(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -118,6 +124,8 @@ export async function saveIngredient(_prev: ActionState, data: FormData): Promis
 
 export async function deleteIngredient(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No ingredient to delete.");
 
@@ -139,6 +147,8 @@ export async function deleteIngredient(_prev: ActionState, data: FormData): Prom
 
 export async function saveRecipe(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -207,6 +217,8 @@ export async function saveRecipe(_prev: ActionState, data: FormData): Promise<Ac
 
 export async function deleteRecipe(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No recipe to delete.");
 
@@ -228,6 +240,8 @@ export async function deleteRecipe(_prev: ActionState, data: FormData): Promise<
 
 export async function saveMenuItem(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -262,6 +276,8 @@ export async function saveMenuItem(_prev: ActionState, data: FormData): Promise<
 
 export async function deleteMenuItem(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No menu item to delete.");
 
@@ -283,6 +299,8 @@ export async function deleteMenuItem(_prev: ActionState, data: FormData): Promis
 
 export async function savePackage(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -387,6 +405,8 @@ export async function savePackage(_prev: ActionState, data: FormData): Promise<A
 
 export async function deletePackage(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No package to delete.");
 
@@ -408,6 +428,8 @@ export async function deletePackage(_prev: ActionState, data: FormData): Promise
 
 export async function saveAddon(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const id = v.optionalText("id");
@@ -439,6 +461,8 @@ export async function saveAddon(_prev: ActionState, data: FormData): Promise<Act
 
 export async function deleteAddon(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const id = String(data.get("id") ?? "");
   if (!id) return failed("No add-on to delete.");
 
@@ -460,6 +484,8 @@ export async function deleteAddon(_prev: ActionState, data: FormData): Promise<A
 
 export async function saveSettings(_prev: ActionState, data: FormData): Promise<ActionState> {
   await requireUser();
+  const denied = await denyReadOnly();
+  if (denied) return denied;
   const v = new Validator(data);
 
   const gstPercent = v.number("gstPercent", "GST rate", { required: true, min: 0, max: 100 });

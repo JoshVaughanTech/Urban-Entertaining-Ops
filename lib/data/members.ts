@@ -15,7 +15,7 @@ import * as s from "@/lib/db/schema";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = PgDatabase<any, any, any>;
 
-export type Role = "admin" | "staff";
+export type Role = "admin" | "staff" | "viewer";
 
 export type Member = {
   id: string;
