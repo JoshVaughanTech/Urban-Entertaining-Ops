@@ -16,7 +16,8 @@
     "db:dev": "tsx --tsconfig tsconfig.json scripts/dev-db.ts",
     "db:demo": "tsx --tsconfig tsconfig.json scripts/demo.ts",
     "db:dev:demo": "tsx --tsconfig tsconfig.json scripts/dev-db.ts --demo",
-    "user:add": "tsx --tsconfig tsconfig.json scripts/add-user.ts"
+    "user:add": "tsx --tsconfig tsconfig.json scripts/add-user.ts",
+    "user:list": "tsx --tsconfig tsconfig.json scripts/list-users.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
