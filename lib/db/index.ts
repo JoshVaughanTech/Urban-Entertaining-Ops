@@ -24,6 +24,11 @@ function build() {
   const pool = (globalThis.__uePool ??= new Pool({
     connectionString: url,
     max: Number(process.env.DATABASE_POOL_MAX ?? 10),
+    /* 0 means never retire an idle connection. Supabase is happy with the
+       default; the local dev database (npm run db:dev) needs a single
+       connection held open, because it serves one at a time. */
+    idleTimeoutMillis: Number(process.env.DATABASE_IDLE_TIMEOUT ?? 10_000),
+    allowExitOnIdle: false,
   }));
 
   return drizzle(pool, { schema, casing: "snake_case" });

@@ -16,7 +16,11 @@ import {
   shortDate,
   todayISO,
 } from "@/lib/engine/format";
-import { form } from "@/components/ui/form";
+/* Straight from the stylesheet, not from components/ui/form. That module is
+   "use client", and a plain object exported across the client boundary
+   arrives here as undefined — the classes silently vanish and the form
+   renders unstyled. A server component imports the CSS module directly. */
+import form from "@/components/ui/form.module.css";
 
 export const metadata = { title: "Ordering" };
 

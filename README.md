@@ -54,6 +54,19 @@ npm run dev
 Without `.env.local` the app still boots, but every screen redirects to `/login`, which
 explains what is missing. No key is ever faked or defaulted.
 
+### Before Supabase exists
+
+`npm run db:dev` runs a throwaway Postgres locally so the app has real data to render. It
+serves one connection at a time, so point `.env.local` at it and pin the pool:
+
+```
+DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres
+DATABASE_POOL_MAX=1
+DATABASE_IDLE_TIMEOUT=0
+```
+
+Signing in still needs a real Supabase project — this covers the data, not the auth.
+
 ## Commands
 
 | Command | What it does |
@@ -66,6 +79,7 @@ explains what is missing. No key is ever faked or defaulted.
 | `npm run db:migrate` | Apply migrations |
 | `npm run db:studio` | Browse the database |
 | `npm run db:seed` | Load `seed/*.json` — safe to re-run |
+| `npm run db:dev` | A local Postgres for development, migrated and seeded |
 
 ## Layout
 

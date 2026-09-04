@@ -69,8 +69,30 @@ wrapper over it.
 - **Drizzle interpolates a JS array as a record**, so a raw `sql` template with
   `<> all(...)` over an array fails with "cannot cast type record to uuid[]". Use the query
   builder's `notInArray(column, values)` instead.
+- **A server component cannot read styles from a `"use client"` module.**
+  `components/ui/form.tsx` is a client module; importing its `form` styles object from a
+  server component yields `undefined`, so every class silently becomes empty and the markup
+  renders unstyled — no error, no warning. Server components import
+  `@/components/ui/form.module.css` directly. This shipped broken on the ordering screen and
+  was only caught by running the app.
 - **Screens under `/app` must not be prerendered** — they read session cookies and live
   data. The layout sets `dynamic = "force-dynamic"`.
+
+## Running it locally
+
+`npm run db:dev` starts a Postgres for development — PGlite behind a real wire-protocol
+socket, migrated and seeded — so the app can run before a Supabase project exists. It
+serves **one connection at a time**, so `.env.local` must pin the pool:
+
+```
+DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres
+DATABASE_POOL_MAX=1
+DATABASE_IDLE_TIMEOUT=0
+```
+
+Without those the pool opens a second connection, or retires and reopens an idle one, and
+the socket server resets it. Auth still needs a real Supabase project — the local database
+covers the data, not the sign-in.
 
 ## Testing
 
@@ -124,7 +146,9 @@ it is what the kitchen can cook rather than a property of a listed dish.
 
 ## Open questions — do not silently resolve these
 
-- **No database-backed screen has ever been rendered.** The app has been built without
-  Supabase credentials. Logic is heavily tested; the UI is typechecked and builds, but
-  unreviewed. Treat any claim about how a screen *looks* as unverified.
+- **The screens have been walked once, against the local database** (4 September 2026):
+  packages, ordering, the quote builder, the quotes list and the client preview all render
+  correctly, and the PDF route returns a real PDF. Not yet walked: the catalogue edit forms,
+  CSV import, settings, and the public /q/[token] page. Nothing has been seen against
+  Supabase itself.
 - Outstanding client-supplied items are tabled at the end of `README.md`.
