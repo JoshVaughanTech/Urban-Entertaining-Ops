@@ -1,5 +1,7 @@
 import { Card, Notice } from "@/components/ui";
+import { HashSession } from "@/components/auth/HashSession";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { safeLanding } from "@/lib/supabase/routes";
 import { LoginForm } from "./LoginForm";
 import styles from "./login.module.css";
 
@@ -18,7 +20,7 @@ export default async function LoginPage({
 }) {
   const { next, reason } = await searchParams;
   const configured = isSupabaseConfigured();
-  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/app/quotes/new";
+  const safeNext = safeLanding(next);
   const message = reason ? REASONS[reason] : undefined;
 
   return (
@@ -31,9 +33,14 @@ export default async function LoginPage({
 
         {configured ? (
           <Card>
-            <p className={styles.intro}>Sign in with a link sent to your email.</p>
-            {message ? <p className={styles.err}>{message}</p> : null}
-            <LoginForm next={safeNext} />
+            {/* An implicit-flow link lands here carrying its tokens in the
+                fragment; HashSession finishes the sign-in before the form
+                is ever shown. */}
+            <HashSession>
+              <p className={styles.intro}>Sign in with a link sent to your email.</p>
+              {message ? <p className={styles.err}>{message}</p> : null}
+              <LoginForm next={safeNext} />
+            </HashSession>
           </Card>
         ) : (
           <Notice>

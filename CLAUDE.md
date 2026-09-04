@@ -78,6 +78,18 @@ wrapper over it.
   renders unstyled — no error, no warning. Server components import
   `@/components/ui/form.module.css` directly. This shipped broken on the ordering screen and
   was only caught by running the app.
+- **A URL fragment never reaches the server.** Supabase can finish a magic link in three
+  shapes: `?code=` (PKCE, what `@supabase/ssr` asks for), `?token_hash=&type=`, or
+  `#access_token=` (implicit). The third is a *fragment*, so `/auth/callback` cannot see it
+  and sign-in fails with **no request in the log at all** — it looks exactly as though the
+  link was never clicked. `components/auth/HashSession.tsx` catches it in the browser, on
+  `/login`, which is where it ends up because fragments survive redirects. The route
+  handles the other two shapes.
+- **Supabase ignores `emailRedirectTo` unless that exact URL is in the redirect allowlist**,
+  and falls back to the Site URL without saying so — the code then lands on `/`, where
+  nothing reads it. Middleware forwards `?code=`/`?token_hash=` from `/` and `/login` to the
+  callback. Only those two paths: forwarding blindly would let a stray query parameter
+  hijack `/q/[token]`, which belongs to a client.
 - **Screens under `/app` must not be prerendered** — they read session cookies and live
   data. The layout sets `dynamic = "force-dynamic"`.
 
@@ -155,6 +167,8 @@ the demo account was added.
 
 `npm run user:add -- <email> <role>` grants access without the Access screen, for a fresh
 deployment or an office whose last admin has left.
+`npm run user:list` prints the list. Both want the
+database to themselves — stop `npm run dev` first when running against the local one.
 
 Three roles. **admin** manages access; **staff** quote and order; **viewer** is read-only —
 it sees every screen and changes nothing, which is what makes a demo account safe to hand

@@ -14,3 +14,18 @@ export const PUBLIC_PREFIXES = ["/login", "/auth", "/q", "/no-access"] as const;
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
+
+/* Where to send someone after they sign in.
+ *
+ * Only ever a path on this app. An open redirect here would be worth real
+ * money to a phisher: the sign-in link is genuine, the address bar says
+ * Urban Entertaining, and the landing page is theirs. "//evil.com" is a
+ * protocol-relative URL, not a local path, which is why the second test
+ * is not redundant. */
+export const DEFAULT_LANDING = "/app/quotes/new";
+
+export function safeLanding(next: string | null | undefined): string {
+  if (!next) return DEFAULT_LANDING;
+  if (!next.startsWith("/") || next.startsWith("//")) return DEFAULT_LANDING;
+  return next;
+}

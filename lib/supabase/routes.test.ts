@@ -5,7 +5,7 @@
  * matching to a bare startsWith. */
 
 import { describe, expect, it } from "vitest";
-import { isPublicPath } from "./routes";
+import { DEFAULT_LANDING, isPublicPath, safeLanding } from "./routes";
 
 describe("public paths", () => {
   it("lets the client reach a quote by its token", () => {
@@ -58,5 +58,35 @@ describe("everything else is gated", () => {
     expect(isPublicPath("/app/q/1")).toBe(false);
     expect(isPublicPath("/app/login")).toBe(false);
     expect(isPublicPath("/x/auth/callback")).toBe(false);
+  });
+});
+
+/* Where someone is dropped after signing in. The value comes off the URL of a
+   link that was emailed to them, so it is attacker-controlled: a genuine
+   Urban Entertaining sign-in link that lands on somebody else's page is a
+   very good phishing primitive. */
+describe("landing after sign-in", () => {
+  it("keeps a real destination", () => {
+    expect(safeLanding("/app/ordering")).toBe("/app/ordering");
+    expect(safeLanding("/app/quotes/abc?tab=cost")).toBe("/app/quotes/abc?tab=cost");
+  });
+
+  it("falls back when there is nothing to go on", () => {
+    expect(safeLanding(null)).toBe(DEFAULT_LANDING);
+    expect(safeLanding(undefined)).toBe(DEFAULT_LANDING);
+    expect(safeLanding("")).toBe(DEFAULT_LANDING);
+  });
+
+  it("refuses to leave the app", () => {
+    for (const hostile of [
+      "https://evil.example/steal",
+      "http://evil.example",
+      "//evil.example",           // protocol-relative: a URL, not a path
+      "//evil.example/app/quotes",
+      "evil.example",
+      "app/quotes",               // relative, resolves against whatever page
+    ]) {
+      expect(safeLanding(hostile), `${hostile} must not be honoured`).toBe(DEFAULT_LANDING);
+    }
   });
 });
