@@ -71,7 +71,7 @@ export function ImportForm() {
             >
               Download template
             </a>
-            <SubmitButton>Check the file</SubmitButton>
+            <SubmitButton writesNothing>Check the file</SubmitButton>
           </Actions>
         </form>
       </Card>

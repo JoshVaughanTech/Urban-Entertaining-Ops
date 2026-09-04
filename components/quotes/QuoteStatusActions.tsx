@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { markQuoteStatus } from "@/lib/actions/quotes";
+import { useReadOnly } from "@/components/ReadOnly";
 import { buttonClass } from "@/components/ui";
 import { FormError } from "@/components/ui/form";
 import { idle } from "@/lib/validate";
@@ -35,8 +36,9 @@ const NEXT_STEPS: Record<QuoteStatus, { status: QuoteStatus; label: string; prim
 export function QuoteStatusActions({ id, status }: { id: string; status: QuoteStatus }) {
   const [state, act] = useActionState(markQuoteStatus, idle);
   const steps = NEXT_STEPS[status];
+  const readOnly = useReadOnly();
 
-  if (steps.length === 0) return null;
+  if (readOnly || steps.length === 0) return null;
 
   return (
     <>
@@ -59,6 +61,9 @@ export function QuoteStatusActions({ id, status }: { id: string; status: QuoteSt
 /** The compact version for the quotes list. */
 export function ConfirmButton({ id }: { id: string }) {
   const [, act] = useActionState(markQuoteStatus, idle);
+  const readOnly = useReadOnly();
+
+  if (readOnly) return null;
 
   return (
     <form action={act}>

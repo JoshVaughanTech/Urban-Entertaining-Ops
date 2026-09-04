@@ -1,3 +1,4 @@
+import { ReadOnlyProvider } from "@/components/ReadOnly";
 import { Sidebar } from "@/components/Sidebar";
 import { requireUser } from "@/lib/auth";
 import styles from "@/components/AppShell.module.css";
@@ -22,7 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         ) : null}
         <main id="main" className={styles.main} tabIndex={-1}>
-          {children}
+          <ReadOnlyProvider readOnly={user.role === "viewer"}>{children}</ReadOnlyProvider>
         </main>
       </div>
     </div>

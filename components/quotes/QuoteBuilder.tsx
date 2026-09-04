@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react";
 import { saveAndPreviewQuote, saveQuoteDraft } from "@/lib/actions/quotes";
+import { CanWrite } from "@/components/ReadOnly";
 import { Card, EmptyState, Tag, buttonClass } from "@/components/ui";
 import { Stat, Stats, Table, ui } from "@/components/ui/table";
 import { Field, FormError, Input, Row, Select, Textarea, form } from "@/components/ui/form";
@@ -489,26 +490,31 @@ export function QuoteBuilder({
               </button>
             </div>
 
-            <div className={ui.actions}>
-              <form action={save}>
-                <input type="hidden" name="payload" value={payload} />
-                {draft.quoteId ? (
-                  <input type="hidden" name="quoteId" value={draft.quoteId} />
-                ) : null}
-                <button type="submit" className={buttonClass("ghost")}>
-                  Save draft
-                </button>
-              </form>
-              <form action={preview}>
-                <input type="hidden" name="payload" value={payload} />
-                {draft.quoteId ? (
-                  <input type="hidden" name="quoteId" value={draft.quoteId} />
-                ) : null}
-                <button type="submit" className={buttonClass()}>
-                  Preview client quote
-                </button>
-              </form>
-            </div>
+            {/* The builder itself stays live for a read-only account — the
+                packages, the margin, the add-ons all still respond. Only
+                saving goes, because only saving writes. */}
+            <CanWrite>
+              <div className={ui.actions}>
+                <form action={save}>
+                  <input type="hidden" name="payload" value={payload} />
+                  {draft.quoteId ? (
+                    <input type="hidden" name="quoteId" value={draft.quoteId} />
+                  ) : null}
+                  <button type="submit" className={buttonClass("ghost")}>
+                    Save draft
+                  </button>
+                </form>
+                <form action={preview}>
+                  <input type="hidden" name="payload" value={payload} />
+                  {draft.quoteId ? (
+                    <input type="hidden" name="quoteId" value={draft.quoteId} />
+                  ) : null}
+                  <button type="submit" className={buttonClass()}>
+                    Preview client quote
+                  </button>
+                </form>
+              </div>
+            </CanWrite>
           </Card>
         ) : (
           <Card>

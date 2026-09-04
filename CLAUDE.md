@@ -154,6 +154,12 @@ out. Every action that writes or sends calls `denyReadOnly()`; the only unguarde
 `previewImport`, which validates an uploaded file and writes nothing. A viewer especially
 cannot email a client or a supplier.
 
+The matching UI lives in `components/ReadOnly.tsx` — `useReadOnly()` and `<CanWrite>`, fed
+by the app layout. Write controls hide themselves rather than refusing on click.
+**That is presentation only.** Hiding a button without also guarding its action would be a
+security hole, not a tidy-up: the browser is never the boundary. `SubmitButton` takes
+`writesNothing` for submits that only read, like the import dry run, which stay available.
+
 The last admin cannot be removed or demoted, by anyone including themselves. Without that
 guard one click leaves nobody able to manage access and no way back except editing the
 database by hand.

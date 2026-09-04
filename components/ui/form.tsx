@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import type { ReactNode } from "react";
+import { useReadOnly } from "@/components/ReadOnly";
 import { buttonClass } from "./index";
 import styles from "./form.module.css";
 
@@ -89,11 +90,18 @@ export function Toggle({
 export function SubmitButton({
   children = "Save",
   variant = "solid",
+  writesNothing = false,
 }: {
   children?: ReactNode;
   variant?: "solid" | "ghost";
+  /** Set for a submit that only reads — a dry run, a search. Those stay
+   *  available to a read-only account. */
+  writesNothing?: boolean;
 }) {
   const { pending } = useFormStatus();
+  const readOnly = useReadOnly();
+  if (readOnly && !writesNothing) return null;
+
   return (
     <button type="submit" className={buttonClass(variant)} disabled={pending}>
       {pending ? "Saving…" : children}

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { markSentWithoutEmail, sendQuoteToClient } from "@/lib/actions/send";
+import { useReadOnly } from "@/components/ReadOnly";
 import { buttonClass } from "@/components/ui";
 import { FormError, FormOk } from "@/components/ui/form";
 import { idle } from "@/lib/validate";
@@ -17,6 +18,9 @@ export function PreviewActions({
 }) {
   const [sendState, send] = useActionState(sendQuoteToClient, idle);
   const [markState, mark] = useActionState(markSentWithoutEmail, idle);
+  const readOnly = useReadOnly();
+
+  if (readOnly) return null;
 
   const state = sendState.message ? sendState : markState;
 

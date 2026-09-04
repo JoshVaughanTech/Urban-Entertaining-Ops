@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useReadOnly } from "@/components/ReadOnly";
 import { buttonClass } from "@/components/ui";
 import { FormError } from "@/components/ui/form";
 import { idle, type ActionState } from "@/lib/validate";
@@ -22,6 +23,9 @@ export function DeleteButton({
 }) {
   const [state, submit] = useActionState(action, idle);
   const [armed, setArmed] = useState(false);
+  const readOnly = useReadOnly();
+
+  if (readOnly) return null;
 
   return (
     <>

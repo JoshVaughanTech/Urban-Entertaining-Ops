@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { sendPurchaseOrders, toggleOrderLine } from "@/lib/actions/orders";
+import { useReadOnly } from "@/components/ReadOnly";
 import { buttonClass } from "@/components/ui";
 import { FormError, FormOk } from "@/components/ui/form";
 import { idle } from "@/lib/validate";
@@ -22,6 +23,7 @@ export function OrderedCheckbox({
   label: string;
 }) {
   const [, act, pending] = useActionState(toggleOrderLine, idle);
+  const readOnly = useReadOnly();
 
   return (
     <form action={act}>
@@ -32,7 +34,7 @@ export function OrderedCheckbox({
       <input
         type="checkbox"
         checked={ordered}
-        disabled={pending}
+        disabled={pending || readOnly}
         aria-label={`Ordered: ${label}`}
         onChange={(e) => e.currentTarget.form?.requestSubmit()}
         style={{ width: "auto", cursor: "pointer" }}
@@ -58,6 +60,9 @@ export function SendPurchaseOrders({
 }) {
   const [state, act] = useActionState(sendPurchaseOrders, idle);
   const [armed, setArmed] = useState(false);
+  const readOnly = useReadOnly();
+
+  if (readOnly) return null;
 
   const willSend = supplierCount - missingEmail.length;
 
