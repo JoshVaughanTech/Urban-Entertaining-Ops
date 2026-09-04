@@ -60,7 +60,7 @@ explains what is missing. No key is ever faked or defaulted.
 | `npm run dev` | Dev server on :3000 |
 | `npm run build` | Production build |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Vitest — engine, CSV import, migration and seed |
+| `npm test` | Vitest — engine, CSV import, quote lifecycle, migration and seed |
 | `npm run db:generate` | Generate a migration from `lib/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
 | `npm run db:seed` | Load `seed/*.json` — safe to re-run |
@@ -125,12 +125,14 @@ file with any error writes nothing at all.
 npm test
 ```
 
-Three suites:
+Four suites:
 
 - **Engine** — every calculation, checked against golden values produced by running the
   approved mockup's own functions over its own data. If a number here changes, the app has
   stopped agreeing with the design.
 - **CSV import** — parsing and row-level validation.
+- **Quote lifecycle** — sequential refs under a row lock, derived lines, draft-only editing,
+  the allowed status transitions, and a sent snapshot that does not move when prices do.
 - **Migration and seed** — runs the real migration and the real seed against an in-process
   Postgres (PGlite, a devDependency; nothing in the app imports it). This proves the
   generated SQL is valid, that the seed is idempotent, and that a price change propagates
@@ -140,7 +142,7 @@ Three suites:
 
 - [x] **Phase 0** — scaffold, auth, shell, proposed schema
 - [x] **Phase 1** — migration, seed, calculation engine, catalogue admin, CSV import
-- [ ] **Phase 2** — quote builder
+- [x] **Phase 2** — quote builder, quote list, status lifecycle, snapshot on send
 - [ ] **Phase 3** — client-facing quote + PDF
 - [ ] **Phase 4** — ordering
 - [ ] **Phase 5** — handover polish

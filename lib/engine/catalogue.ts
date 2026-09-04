@@ -59,3 +59,17 @@ export function packagesUsingMenuItem(cat: Catalogue): Map<string, Package[]> {
   }
   return used;
 }
+
+/** Flattens the lookup maps back into plain arrays, for handing the
+ *  catalogue to a client component. The builder needs the whole graph so the
+ *  margin can move as staff type, without a round trip per keystroke. */
+export function toCatalogueInput(cat: Catalogue): CatalogueInput {
+  return {
+    suppliers: [...cat.suppliers.values()],
+    ingredients: [...cat.ingredients.values()],
+    recipes: [...cat.recipes.values()],
+    menuItems: [...cat.menuItems.values()],
+    packages: [...cat.packages.values()],
+    addons: [...cat.addons.values()],
+  };
+}
