@@ -128,12 +128,16 @@ file with any error writes nothing at all.
 npm test
 ```
 
-Seven suites:
+Nine suites:
 
 - **Engine** — every calculation, checked against golden values produced by running the
   approved mockup's own functions over its own data. If a number here changes, the app has
   stopped agreeing with the design.
 - **CSV import** — parsing and row-level validation.
+- **Form validation** — the boundary every price staff type crosses on its way into the
+  catalogue: dollars to integer cents, thousands separators, rounding, and the bounds.
+- **Authorisation boundary** — which paths are reachable without signing in. Pins down that
+  `/quotes` is not public just because `/q` is.
 - **Quote lifecycle** — sequential refs under a row lock, derived lines, draft-only editing,
   the allowed status transitions, and a sent snapshot that does not move when prices do.
   Confirming is reachable from any other status, as the mockup has it; a draft confirmed

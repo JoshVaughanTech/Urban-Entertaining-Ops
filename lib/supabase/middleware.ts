@@ -1,11 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { readSupabaseEnv } from "./env";
-
-const PUBLIC_PREFIXES = ["/login", "/auth", "/q"];
-
-const isPublic = (pathname: string) =>
-  PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+import { isPublicPath } from "./routes";
 
 /** Refreshes the Supabase session cookie and gates everything that isn't
  *  explicitly public. With no Supabase config there is no way to
@@ -16,7 +12,7 @@ export async function updateSession(request: NextRequest) {
   const env = readSupabaseEnv();
 
   if (!env) {
-    if (isPublic(pathname)) return NextResponse.next({ request });
+    if (isPublicPath(pathname)) return NextResponse.next({ request });
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("reason", "unconfigured");
@@ -42,7 +38,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && !isPublic(pathname)) {
+  if (!user && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
