@@ -128,7 +128,7 @@ file with any error writes nothing at all.
 npm test
 ```
 
-Nine suites:
+Ten suites:
 
 - **Engine** — every calculation, checked against golden values produced by running the
   approved mockup's own functions over its own data. If a number here changes, the app has
@@ -136,6 +136,9 @@ Nine suites:
 - **CSV import** — parsing and row-level validation.
 - **Form validation** — the boundary every price staff type crosses on its way into the
   catalogue: dollars to integer cents, thousands separators, rounding, and the bounds.
+- **Quote payload** — the builder posts its whole state as JSON, so anyone can post anything.
+  Covers what a well-formed payload produces and what a malformed or hostile one is refused
+  for, including that it cannot be used to set a status or a reference.
 - **Authorisation boundary** — which paths are reachable without signing in. Pins down that
   `/quotes` is not public just because `/q` is.
 - **Quote lifecycle** — sequential refs under a row lock, derived lines, draft-only editing,

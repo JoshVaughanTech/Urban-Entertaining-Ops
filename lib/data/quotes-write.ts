@@ -12,14 +12,15 @@ import * as s from "@/lib/db/schema";
 import { buildQuoteLines } from "@/lib/engine/pricing";
 import { buildSnapshot } from "@/lib/engine/snapshot";
 import type { Addon, Catalogue, QuoteLine, Settings } from "@/lib/engine/types";
-import type { QuoteStatus, QuoteWriteInput } from "@/lib/quotes/types";
+import { QuoteError, type QuoteStatus, type QuoteWriteInput } from "@/lib/quotes/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = PgDatabase<any, any, any>;
 
-const num = (n: number) => String(n);
+/* Re-exported so callers keep a single import for the write layer. */
+export { QuoteError };
 
-export class QuoteError extends Error {}
+const num = (n: number) => String(n);
 
 /** Next sequential reference, taken under a row lock so two staff saving at
  *  the same moment cannot both get UE-1051. */

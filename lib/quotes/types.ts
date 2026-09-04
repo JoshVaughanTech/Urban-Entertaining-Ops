@@ -1,5 +1,8 @@
 import type { DietaryTag, Style } from "@/lib/engine/types";
 
+/** Anything the caller got wrong, phrased for a person to read. */
+export class QuoteError extends Error {}
+
 /** What the builder sends when it saves. Shared by the client form, the
  *  server action and the write layer, so all three agree on the shape. */
 export type QuoteEventInput = {
