@@ -8,7 +8,14 @@ import { loadWorkspace } from "@/lib/data/load";
 import { buildOrdering, loadOrderState } from "@/lib/data/orders";
 import { db } from "@/lib/db";
 import { emailIsConfigured } from "@/lib/email/send";
-import { addDays, money, moneyPrecise, qty as fmtQty, shortDate, todayISO } from "@/lib/engine/format";
+import {
+  addDays,
+  money,
+  qty as fmtQty,
+  qtyNeeded,
+  shortDate,
+  todayISO,
+} from "@/lib/engine/format";
 import { form } from "@/components/ui/form";
 
 export const metadata = { title: "Ordering" };
@@ -177,7 +184,7 @@ export default async function OrderingPage({
                             </td>
                             <td>{line.ingredientName}</td>
                             <td className={ui.num}>
-                              {fmtQty(line.neededQty)} {line.unit}
+                              {qtyNeeded(line.neededQty, line.unit)}
                             </td>
                             <td className={ui.num}>
                               <b>
@@ -185,7 +192,7 @@ export default async function OrderingPage({
                                 {line.unit}
                               </b>
                             </td>
-                            <td className={ui.num}>{moneyPrecise(line.cost)}</td>
+                            <td className={ui.num}>{money(line.cost)}</td>
                             <td className={`${ui.muted} ${ui.small}`}>
                               {line.quoteRefs.join(", ")}
                             </td>

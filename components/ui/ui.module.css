@@ -330,7 +330,8 @@
 }
 
 .lineInput {
-  width: 90px;
+  /* Matches the mockup's in-table input exactly. */
+  width: 80px;
   text-align: right;
   padding: 5px 8px;
   border: 1px solid var(--line);

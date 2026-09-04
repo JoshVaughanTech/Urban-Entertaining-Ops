@@ -4,7 +4,7 @@ import { Card, EmptyState, PageHeader, Tag, buttonClass } from "@/components/ui"
 import { Table, ui } from "@/components/ui/table";
 import { loadWorkspace } from "@/lib/data/load";
 import { menuItemCostPerHead, foodCostPerHead } from "@/lib/engine/pricing";
-import { moneyPrecise, percent, qty as fmtQty } from "@/lib/engine/format";
+import { money, moneyPrecise, percent, qty as fmtQty } from "@/lib/engine/format";
 import { sortTiers } from "@/lib/engine/pricing";
 
 export const metadata = { title: "Packages" };
@@ -56,7 +56,7 @@ export default async function PackagesPage() {
                     const from = i === 0 ? null : (tiers[i - 1]?.upToGuests ?? 0) + 1;
                     return (
                       <div key={tier.upToGuests} className={ui.tier}>
-                        <b className={ui.tierPrice}>{moneyPrecise(tier.pricePerHead)}</b>
+                        <b className={ui.tierPrice}>{money(tier.pricePerHead)}</b>
                         <span className={ui.statLabel}>
                           {from === null
                             ? `up to ${tier.upToGuests}`

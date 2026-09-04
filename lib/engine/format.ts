@@ -19,6 +19,11 @@ export const qty = (n: number, unit?: Unit): string => {
   return unit ? `${text} ${unit}` : text;
 };
 
+/** One decimal place — how the order sheet states what a window needs,
+ *  before it is rounded up to whole supplier packs. */
+export const qtyNeeded = (n: number, unit?: Unit): string =>
+  unit ? `${n.toFixed(1)} ${unit}` : n.toFixed(1);
+
 /** ISO date in, "12 Sep" out. Parsed as local midnight so the day never
  *  slips backwards through a timezone conversion. */
 export const shortDate = (iso: string): string =>

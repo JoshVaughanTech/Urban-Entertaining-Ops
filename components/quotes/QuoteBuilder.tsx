@@ -127,7 +127,7 @@ export function QuoteBuilder({
             id="clientName"
             value={draft.event.clientName}
             onChange={(e) => setEvent("clientName", e.target.value)}
-            placeholder="e.g. Harper &amp; Co. wedding"
+            placeholder="e.g. Harper & Co. wedding"
           />
         </Field>
 
