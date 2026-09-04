@@ -272,11 +272,40 @@ describe("status", () => {
     expect((await loadQuote(db, id))!.status).toBe("confirmed");
   });
 
-  it("refuses to decline a quote that was already confirmed", async () => {
+  /* Clients do pull out after confirming. */
+  it("can decline a quote that was already confirmed", async () => {
     const { id } = await createQuote(db, input(), cat, settings, null);
     await sendQuote(db, id, cat, settings);
-    await setQuoteStatus(db, id, "confirmed");
-    await expect(setQuoteStatus(db, id, "declined")).rejects.toThrow(/cannot be marked declined/);
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+    const confirmedAt = (await loadQuote(db, id))!.confirmedAt;
+
+    await setQuoteStatus(db, id, "declined");
+
+    const after = await loadQuote(db, id);
+    expect(after!.status).toBe("declined");
+    // The record of when it was won survives the client changing their mind.
+    expect(after!.confirmedAt).toEqual(confirmedAt);
+  });
+
+  it("stops ordering for a confirmed quote that is later declined", async () => {
+    const { id } = await createQuote(
+      db,
+      input({
+        event: { ...input().event, clientName: "Pulled Out", eventDate: "2027-03-14" },
+      }),
+      cat,
+      settings,
+      null,
+    );
+
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+    const inWindow = await loadConfirmedInWindow(db, "2027-03-01", "2027-03-31");
+    expect(inWindow.some((q) => q.id === id)).toBe(true);
+
+    await setQuoteStatus(db, id, "declined");
+
+    const after = await loadConfirmedInWindow(db, "2027-03-01", "2027-03-31");
+    expect(after.some((q) => q.id === id), "declined events must not be ordered for").toBe(false);
   });
 
   it("keeps the confirmation date when a confirmed quote is later cancelled", async () => {

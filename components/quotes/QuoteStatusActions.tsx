@@ -17,7 +17,10 @@ const NEXT_STEPS: Record<QuoteStatus, { status: QuoteStatus; label: string; prim
       { status: "confirmed", label: "Mark confirmed", primary: true },
       { status: "declined", label: "Mark declined" },
     ],
-    confirmed: [{ status: "cancelled", label: "Cancel quote" }],
+    confirmed: [
+      { status: "declined", label: "Mark declined" },
+      { status: "cancelled", label: "Cancel quote" },
+    ],
     declined: [
       { status: "confirmed", label: "Mark confirmed" },
       { status: "cancelled", label: "Cancel quote" },

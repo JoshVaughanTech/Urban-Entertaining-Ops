@@ -382,7 +382,7 @@ export async function sendQuote(
 const ALLOWED_TRANSITIONS: Record<QuoteStatus, QuoteStatus[]> = {
   draft: ["confirmed", "cancelled"],
   sent: ["confirmed", "declined", "cancelled"],
-  confirmed: ["cancelled"],
+  confirmed: ["declined", "cancelled"],
   declined: ["confirmed", "cancelled"],
   cancelled: ["confirmed"],
 };
