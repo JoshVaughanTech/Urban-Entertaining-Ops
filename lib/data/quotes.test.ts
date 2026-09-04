@@ -325,6 +325,34 @@ describe("status", () => {
     await setQuoteStatus(db, id, "cancelled");
     expect((await loadQuote(db, id))!.status).toBe("cancelled");
   });
+
+  it("can decline a quote that was cancelled", async () => {
+    const { id } = await createQuote(db, input(), cat, settings, null);
+    await setQuoteStatus(db, id, "cancelled");
+    await setQuoteStatus(db, id, "declined");
+    expect((await loadQuote(db, id))!.status).toBe("declined");
+  });
+
+  /* Every outcome can be corrected into another outcome. What cannot happen
+     is relabelling one back into a state that is entered by doing something:
+     draft by writing the quote, sent by sending it. */
+  it("never relabels a quote back to draft or sent", async () => {
+    const { id } = await createQuote(db, input(), cat, settings, null);
+    await sendQuote(db, id, cat, settings);
+
+    await expect(setQuoteStatus(db, id, "draft")).rejects.toThrow(/cannot be marked draft/);
+
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+    await expect(setQuoteStatus(db, id, "draft")).rejects.toThrow(/cannot be marked draft/);
+
+    await setQuoteStatus(db, id, "cancelled");
+    await expect(setQuoteStatus(db, id, "sent")).rejects.toThrow(/cannot be marked sent/);
+    await expect(setQuoteStatus(db, id, "draft")).rejects.toThrow(/cannot be marked draft/);
+
+    // Still recoverable into a real outcome, though.
+    await setQuoteStatus(db, id, "declined");
+    expect((await loadQuote(db, id))!.status).toBe("declined");
+  });
 });
 
 describe("deleting", () => {

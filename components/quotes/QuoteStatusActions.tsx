@@ -25,7 +25,10 @@ const NEXT_STEPS: Record<QuoteStatus, { status: QuoteStatus; label: string; prim
       { status: "confirmed", label: "Mark confirmed" },
       { status: "cancelled", label: "Cancel quote" },
     ],
-    cancelled: [{ status: "confirmed", label: "Mark confirmed" }],
+    cancelled: [
+      { status: "confirmed", label: "Mark confirmed" },
+      { status: "declined", label: "Mark declined" },
+    ],
   };
 
 /** Status is the only thing that moves on a quote once it has been sent. */

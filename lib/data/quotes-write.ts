@@ -379,13 +379,17 @@ export async function sendQuote(
 /* Confirming is reachable from every other status, matching the mockup,
    which offers "Mark confirmed" on anything not already confirmed. Staff
    confirm over the phone all the time, often before the quote has formally
-   been sent, and a mis-click on cancel should be recoverable. */
+   been sent, and a mis-click on cancel should be recoverable.
+
+   Nothing leads back to draft or sent: those are entered by doing something
+   — writing the quote, sending it — not by relabelling an outcome. Every
+   other outcome can be corrected. */
 const ALLOWED_TRANSITIONS: Record<QuoteStatus, QuoteStatus[]> = {
   draft: ["confirmed", "cancelled"],
   sent: ["confirmed", "declined", "cancelled"],
   confirmed: ["declined", "cancelled"],
   declined: ["confirmed", "cancelled"],
-  cancelled: ["confirmed"],
+  cancelled: ["confirmed", "declined"],
 };
 
 /** Status is the one thing that still moves once a quote leaves draft.

@@ -103,13 +103,19 @@ Don't redesign. Deviate only where the web genuinely needs it — focus rings, r
 stacking, loading states — and comment where you do. The mockup's palette in
 `app/globals.css` is the palette, not a suggestion.
 
+## Quote status
+
+Every outcome can be corrected into another outcome — confirmed, declined and cancelled all
+reach each other, and the mockup's "Mark confirmed" shows on anything not already confirmed.
+What is refused is relabelling back into a state that is entered by *doing* something: draft
+by writing the quote, sent by sending it. Confirming a draft freezes a snapshot, because a
+confirmed quote must render from one.
+
 ## Open questions — do not silently resolve these
 
 - **`packages.adaptable_dietary`** was added so the fit checker matches the mockup, which
   blocks only vegan on grazing. The seed assumes every package can be adapted for every diet
   except that one. Real per-package capability is still unconfirmed.
-- **`cancelled → declined`** is not an allowed status transition. Cancelled leads only back
-  to confirmed. Inherited rather than decided.
 - **No database-backed screen has ever been rendered.** The app has been built without
   Supabase credentials. Logic is heavily tested; the UI is typechecked and builds, but
   unreviewed. Treat any claim about how a screen *looks* as unverified.
