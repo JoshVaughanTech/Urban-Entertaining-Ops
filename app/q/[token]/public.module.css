@@ -1,0 +1,24 @@
+.wrap {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px 60px;
+}
+
+.inner {
+  width: 100%;
+  max-width: 640px;
+}
+
+.footer {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    padding: 20px 12px 40px;
+  }
+}

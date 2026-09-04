@@ -211,14 +211,25 @@ export async function updateQuote(
   });
 }
 
-/** Freezes the quote and marks it sent. After this the client's copy and the
- *  app's copy are the same document, whatever happens to prices later. */
-export async function sendQuote(
+export type PreparedSend = {
+  snapshot: ReturnType<typeof buildSnapshot>;
+  token: string;
+  clientName: string;
+  clientEmail: string | null;
+};
+
+/** Works out exactly what would be frozen, and reads nothing back.
+ *
+ *  Split from the write on purpose: the PDF that gets emailed is rendered
+ *  from this snapshot, and only once the email has actually gone does
+ *  markSent persist it. A quote is never left saying "sent" because an
+ *  email bounced. */
+export async function prepareSend(
   db: Db,
   quoteId: string,
   cat: Catalogue,
   settings: Settings,
-): Promise<{ token: string }> {
+): Promise<PreparedSend> {
   return db.transaction(async (tx) => {
     const [row] = await tx
       .select()
@@ -288,19 +299,56 @@ export async function sendQuote(
     // URL-safe, unguessable, and only ever handed out with the quote.
     const token = row.publicToken ?? randomBytes(24).toString("base64url");
 
+    return {
+      snapshot,
+      token,
+      clientName: event.clientName,
+      clientEmail: event.contactEmail,
+    };
+  });
+}
+
+/** Persists a prepared send. Re-checks the status inside the transaction, so
+ *  two people hitting "send" at once cannot both write. */
+export async function markSent(
+  db: Db,
+  quoteId: string,
+  prepared: PreparedSend,
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ status: s.quotes.status })
+      .from(s.quotes)
+      .where(eq(s.quotes.id, quoteId))
+      .limit(1);
+
+    if (!row) throw new QuoteError("That quote no longer exists.");
+    if (row.status !== "draft") throw new QuoteError("This quote has already been sent.");
+
     await tx
       .update(s.quotes)
       .set({
         status: "sent",
         sentAt: new Date(),
-        snapshot,
-        publicToken: token,
+        snapshot: prepared.snapshot,
+        publicToken: prepared.token,
         updatedAt: new Date(),
       })
       .where(eq(s.quotes.id, quoteId));
-
-    return { token };
   });
+}
+
+/** Freezes the quote and marks it sent, without emailing anything. Used when
+ *  staff send the quote themselves, and by the tests. */
+export async function sendQuote(
+  db: Db,
+  quoteId: string,
+  cat: Catalogue,
+  settings: Settings,
+): Promise<{ token: string }> {
+  const prepared = await prepareSend(db, quoteId, cat, settings);
+  await markSent(db, quoteId, prepared);
+  return { token: prepared.token };
 }
 
 const ALLOWED_TRANSITIONS: Record<QuoteStatus, QuoteStatus[]> = {

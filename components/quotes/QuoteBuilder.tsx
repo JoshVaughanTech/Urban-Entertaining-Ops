@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { saveAndSendQuote, saveQuoteDraft } from "@/lib/actions/quotes";
+import { saveAndPreviewQuote, saveQuoteDraft } from "@/lib/actions/quotes";
 import { Card, EmptyState, Tag, buttonClass } from "@/components/ui";
 import { Stat, Stats, Table, ui } from "@/components/ui/table";
 import { Field, FormError, Input, Row, Select, Textarea, form } from "@/components/ui/form";
@@ -53,7 +53,7 @@ export function QuoteBuilder({
 
   const [draft, setDraft] = useState<Draft>(initial);
   const [saveState, save] = useActionState(saveQuoteDraft, idle);
-  const [sendState, send] = useActionState(saveAndSendQuote, idle);
+  const [previewState, preview] = useActionState(saveAndPreviewQuote, idle);
 
   const setEvent = <K extends keyof QuoteEventInput>(key: K, value: QuoteEventInput[K]) =>
     setDraft((d) => ({ ...d, event: { ...d.event, [key]: value } }));
@@ -117,7 +117,7 @@ export function QuoteBuilder({
     customLines: draft.customLines,
   });
 
-  const error = saveState.message ?? sendState.message;
+  const error = saveState.message ?? previewState.message;
 
   return (
     <div className={ui.splitGrid}>
@@ -499,13 +499,13 @@ export function QuoteBuilder({
                   Save draft
                 </button>
               </form>
-              <form action={send}>
+              <form action={preview}>
                 <input type="hidden" name="payload" value={payload} />
                 {draft.quoteId ? (
                   <input type="hidden" name="quoteId" value={draft.quoteId} />
                 ) : null}
                 <button type="submit" className={buttonClass()}>
-                  Save &amp; mark sent
+                  Preview client quote
                 </button>
               </form>
             </div>

@@ -211,3 +211,34 @@ export async function deleteQuoteDraft(_prev: ActionState, data: FormData): Prom
   revalidateQuotes();
   redirect("/app/quotes");
 }
+
+/** Saves the draft, then opens the client-facing preview — the mockup's
+ *  "Preview client quote". Sending happens from there. */
+export async function saveAndPreviewQuote(
+  _prev: ActionState,
+  data: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+
+  let destination: string;
+
+  try {
+    const input = parsePayload(data);
+    const cat = await loadCatalogue(db);
+    const settings = await loadSettings(db);
+    const existingId = String(data.get("quoteId") ?? "");
+
+    if (existingId) {
+      await updateQuote(db, existingId, input, cat, settings);
+      destination = `/app/quotes/${existingId}/preview`;
+    } else {
+      const { id } = await createQuote(db, input, cat, settings, user.id);
+      destination = `/app/quotes/${id}/preview`;
+    }
+  } catch (err) {
+    return failed(message(err));
+  }
+
+  revalidateQuotes();
+  redirect(destination as Route);
+}

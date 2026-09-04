@@ -209,3 +209,25 @@ export function totalsFor(quote: QuoteDetail, cat: Catalogue, settings: Settings
     cat,
   });
 }
+
+/** The client's own view, found by the token in their link. Only ever
+ *  returns a quote that has actually been sent and carries a snapshot —
+ *  there is nothing to show a client otherwise, and a draft is not theirs
+ *  to see. */
+export async function loadQuoteByToken(db: Db, token: string): Promise<QuoteDetail | null> {
+  if (!token) return null;
+
+  const [row] = await db
+    .select({ id: s.quotes.id })
+    .from(s.quotes)
+    .where(eq(s.quotes.publicToken, token))
+    .limit(1);
+
+  if (!row) return null;
+
+  const quote = await loadQuote(db, row.id);
+  if (!quote || !quote.snapshot) return null;
+  if (quote.status === "cancelled") return null;
+
+  return quote;
+}
