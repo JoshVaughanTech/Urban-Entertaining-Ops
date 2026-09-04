@@ -13,7 +13,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx --tsconfig tsconfig.json scripts/seed.ts",
-    "db:dev": "tsx --tsconfig tsconfig.json scripts/dev-db.ts"
+    "db:dev": "tsx --tsconfig tsconfig.json scripts/dev-db.ts",
+    "db:demo": "tsx --tsconfig tsconfig.json scripts/demo.ts",
+    "db:dev:demo": "tsx --tsconfig tsconfig.json scripts/dev-db.ts --demo"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
