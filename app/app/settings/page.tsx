@@ -6,6 +6,8 @@ import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { loadWorkspace } from "@/lib/data/load";
 
+export const metadata = { title: "Settings" };
+
 export default async function SettingsPage() {
   const state = await loadWorkspace();
 

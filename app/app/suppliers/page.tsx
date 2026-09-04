@@ -4,6 +4,8 @@ import { Card, EmptyState, PageHeader, Tag, buttonClass } from "@/components/ui"
 import { Table, ui } from "@/components/ui/table";
 import { loadWorkspace } from "@/lib/data/load";
 
+export const metadata = { title: "Suppliers" };
+
 export default async function SuppliersPage() {
   const state = await loadWorkspace();
 

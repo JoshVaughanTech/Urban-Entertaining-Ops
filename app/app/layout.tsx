@@ -11,8 +11,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className={styles.shell}>
+      <a href="#main" className={styles.skipLink}>
+        Skip to content
+      </a>
       <Sidebar email={user.email} />
-      <main className={styles.main}>{children}</main>
+      <main id="main" className={styles.main} tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 }

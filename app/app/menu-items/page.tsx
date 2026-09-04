@@ -8,6 +8,8 @@ import { moneyPrecise, qty as fmtQty } from "@/lib/engine/format";
 import { menuItemCostPerHead } from "@/lib/engine/pricing";
 import { DIETARY_LABELS } from "@/lib/engine/types";
 
+export const metadata = { title: "Menu items" };
+
 export default async function MenuItemsPage() {
   const state = await loadWorkspace();
 

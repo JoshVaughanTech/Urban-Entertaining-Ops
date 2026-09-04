@@ -11,6 +11,8 @@ import { emailIsConfigured } from "@/lib/email/send";
 import { addDays, money, moneyPrecise, qty as fmtQty, shortDate, todayISO } from "@/lib/engine/format";
 import { form } from "@/components/ui/form";
 
+export const metadata = { title: "Ordering" };
+
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
 export default async function OrderingPage({

@@ -5,6 +5,8 @@ import { loadWorkspace } from "@/lib/data/load";
 import { toCatalogueInput } from "@/lib/engine/catalogue";
 import { addDays, todayISO } from "@/lib/engine/format";
 
+export const metadata = { title: "New quote" };
+
 export default async function NewQuotePage() {
   const state = await loadWorkspace();
 

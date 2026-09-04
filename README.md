@@ -155,7 +155,9 @@ Seven suites:
 - [x] **Phase 2** — quote builder, quote list, status lifecycle, snapshot on send
 - [x] **Phase 3** — client preview, branded PDF, send via Resend, public link
 - [x] **Phase 4** — ordering: rollup by supplier, persisted ticks, CSV export, purchase orders
-- [ ] **Phase 5** — handover polish
+- [~] **Phase 5** — handover polish: error/404 boundaries, loading states, skip link,
+      focus rings, dead-code sweep, deploy docs. **The visual pass is still outstanding** —
+      no database-backed screen has been seen running.
 
 The initial migration is in `drizzle/0000_init.sql`. It has been run against an in-process
 Postgres in the test suite, but not yet against a real Supabase project.
@@ -203,3 +205,47 @@ sheets.
 Suppliers with no `contact_email` are **never silently skipped**: they are labelled in the
 table, named in the confirm dialog before anything sends, and listed again in the result.
 All six seeded suppliers are in that state until real addresses arrive.
+
+## Deploying
+
+Vercel, from this repository.
+
+1. **Import the repo** in Vercel. The defaults are right — it is a standard Next.js app, no
+   build-command override needed.
+2. **Set the environment variables** from the table above, in Vercel's project settings. Two
+   differ from local:
+   - `NEXT_PUBLIC_SITE_URL` must be the production URL, e.g. `https://ops.urbanentertaining.com.au`.
+     Magic-link sign-in and the client's quote link are both built from it.
+   - `DATABASE_URL` should be Supabase's **session pooler** connection string.
+3. **Allow the production URL in Supabase.** Authentication → URL Configuration → add
+   `https://your-domain/auth/callback` to the redirect allow-list. Sign-in fails silently
+   without this.
+4. **Run the migration against production once:**
+
+   ```bash
+   DATABASE_URL="<production connection string>" npm run db:migrate
+   ```
+
+5. **Do not seed production.** `npm run db:seed` loads the placeholder catalogue from the
+   mockup. Real data goes in through `/app/recipes/import` and the catalogue screens. The
+   only row production genuinely needs is `settings`, which the seed also creates — if you
+   skip the seed entirely, insert that row by hand or run the seed against an empty database
+   before entering real data and then delete the placeholder rows.
+6. **Verify sign-in works** before handing the app to staff: the magic link is the only way in.
+
+Migrations are not run automatically on deploy. That is deliberate — a schema change to a
+live catering database should be a decision someone makes, not a side effect of a push.
+
+## What still needs the client
+
+Tracked here so nothing is quietly assumed:
+
+| Item | Why it matters | Where it goes |
+| --- | --- | --- |
+| Supabase project + keys | Nothing runs without it | `.env.local` |
+| Resend API key + verified sender | Quotes and purchase orders cannot email | `.env.local` |
+| Supplier contact emails | Purchase orders skip suppliers without one | `/app/suppliers` |
+| UE logo | Placeholder box on the quote and PDF | `QuoteDocumentView.tsx`, `QuotePdf.tsx` |
+| Cormorant Garamond + Mulish `.ttf` | PDF falls back to Times/Helvetica | `registerBrandFonts()` |
+| Real staff cost and charge-out rates | Seeded from the mockup: $48 and $76.80 | `/app/settings` |
+| Which packages can be adapted for which diets | Seeded as "all except vegan on grazing" | `/app/packages` |

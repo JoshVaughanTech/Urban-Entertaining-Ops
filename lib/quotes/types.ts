@@ -38,10 +38,3 @@ export type QuoteStatus = "draft" | "sent" | "confirmed" | "declined" | "cancell
  *  client was told, so only its status may change. */
 export const isEditable = (status: QuoteStatus) => status === "draft";
 
-export const STATUS_LABELS: Record<QuoteStatus, string> = {
-  draft: "draft",
-  sent: "sent",
-  confirmed: "confirmed",
-  declined: "declined",
-  cancelled: "cancelled",
-};

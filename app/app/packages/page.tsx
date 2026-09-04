@@ -7,6 +7,8 @@ import { menuItemCostPerHead, foodCostPerHead } from "@/lib/engine/pricing";
 import { moneyPrecise, percent, qty as fmtQty } from "@/lib/engine/format";
 import { sortTiers } from "@/lib/engine/pricing";
 
+export const metadata = { title: "Packages" };
+
 /** Food cost above this share of the lowest tier gets an amber flag, per the
  *  mockup. It is a prompt to look, not a failure. */
 const FOOD_COST_WARN = 0.3;

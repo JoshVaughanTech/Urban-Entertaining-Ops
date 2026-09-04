@@ -5,6 +5,8 @@ import { Table, ui } from "@/components/ui/table";
 import { loadWorkspace } from "@/lib/data/load";
 import { moneyPrecise } from "@/lib/engine/format";
 
+export const metadata = { title: "Add-ons" };
+
 export default async function AddonsPage() {
   const state = await loadWorkspace();
 

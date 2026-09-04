@@ -10,6 +10,8 @@ import { money, shortDate } from "@/lib/engine/format";
 import type { QuoteStatus } from "@/lib/quotes/types";
 import styles from "./quotes.module.css";
 
+export const metadata = { title: "Quotes" };
+
 const FILTERS: { value: string; label: string }[] = [
   { value: "all", label: "All" },
   { value: "draft", label: "Drafts" },

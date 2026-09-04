@@ -82,3 +82,11 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* On the dark nav and dark buttons a green ring disappears, so invert it
+   there. Focus must stay visible on every background. */
+[data-dark] :focus-visible,
+nav a:focus-visible,
+nav button:focus-visible {
+  outline-color: var(--paper);
+}

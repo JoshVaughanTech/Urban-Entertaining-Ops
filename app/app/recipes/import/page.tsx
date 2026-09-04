@@ -3,6 +3,8 @@ import { ImportForm } from "@/components/forms/ImportForm";
 import { PageHeader } from "@/components/ui";
 import { ui } from "@/components/ui/table";
 
+export const metadata = { title: "Import" };
+
 export default function ImportPage() {
   return (
     <>

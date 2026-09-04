@@ -9,6 +9,8 @@ import { moneyPrecise, qty as fmtQty } from "@/lib/engine/format";
 import { recipeCostPerPortion } from "@/lib/engine/pricing";
 import type { Catalogue } from "@/lib/engine/types";
 
+export const metadata = { title: "Recipes" };
+
 type Tab = "recipes" | "ingredients";
 
 export default async function RecipesPage({

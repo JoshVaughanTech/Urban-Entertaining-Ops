@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { SetupNotice } from "@/components/SetupNotice";
 import { QuoteBuilder } from "@/components/quotes/QuoteBuilder";
 import { QuoteStatusActions } from "@/components/quotes/QuoteStatusActions";
+import { DeleteButton } from "@/components/forms/DeleteButton";
 import { Card, PageHeader, Tag } from "@/components/ui";
 import { Stat, Stats, Table, ui } from "@/components/ui/table";
+import { deleteQuoteDraft } from "@/lib/actions/quotes";
 import { loadWorkspace } from "@/lib/data/load";
 import { loadQuote, totalsFor } from "@/lib/data/quotes";
 import { db } from "@/lib/db";
@@ -57,6 +59,16 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
               .map((l) => ({ label: l.label, qty: l.qty, unitPrice: l.unitPrice })),
           }}
         />
+
+        <div style={{ marginTop: 18 }}>
+          <Card title="Discard this draft">
+            <p className={ui.muted} style={{ marginTop: 0 }}>
+              Deletes the draft and the event behind it. Only drafts can be discarded —
+              anything the client has seen stays on the record.
+            </p>
+            <DeleteButton action={deleteQuoteDraft} id={quote.id} label="Delete draft" />
+          </Card>
+        </div>
       </>
     );
   }

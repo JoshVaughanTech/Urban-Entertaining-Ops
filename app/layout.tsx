@@ -18,8 +18,13 @@ const mulish = Mulish({
 });
 
 export const metadata: Metadata = {
-  title: "Urban Entertaining — Operations",
+  title: {
+    default: "Urban Entertaining — Operations",
+    template: "%s · Urban Entertaining",
+  },
   description: "Quoting and ordering for Urban Entertaining.",
+  // Internal tool; the public quote page sets its own noindex too.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

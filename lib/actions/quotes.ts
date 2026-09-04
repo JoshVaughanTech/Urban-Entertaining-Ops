@@ -10,7 +10,6 @@ import {
   QuoteError,
   createQuote,
   deleteDraft,
-  sendQuote,
   setQuoteStatus,
   updateQuote,
 } from "@/lib/data/quotes-write";
@@ -143,37 +142,6 @@ export async function saveQuoteDraft(_prev: ActionState, data: FormData): Promis
       const { id } = await createQuote(db, input, cat, settings, user.id);
       destination = `/app/quotes/${id}`;
     }
-  } catch (err) {
-    return failed(message(err));
-  }
-
-  revalidateQuotes();
-  redirect(destination as Route);
-}
-
-/** Saves whatever is on screen, then freezes it. Phase 3 attaches the email;
- *  the snapshot is written here because that is what "sent" means. */
-export async function saveAndSendQuote(_prev: ActionState, data: FormData): Promise<ActionState> {
-  const user = await requireUser();
-
-  let destination: string;
-
-  try {
-    const input = parsePayload(data);
-    const cat = await loadCatalogue(db);
-    const settings = await loadSettings(db);
-    const existingId = String(data.get("quoteId") ?? "");
-
-    let quoteId = existingId;
-    if (quoteId) {
-      await updateQuote(db, quoteId, input, cat, settings);
-    } else {
-      const created = await createQuote(db, input, cat, settings, user.id);
-      quoteId = created.id;
-    }
-
-    await sendQuote(db, quoteId, cat, settings);
-    destination = `/app/quotes/${quoteId}`;
   } catch (err) {
     return failed(message(err));
   }
