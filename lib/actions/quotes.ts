@@ -157,7 +157,11 @@ export async function markQuoteStatus(_prev: ActionState, data: FormData): Promi
   const next = String(data.get("status") ?? "") as QuoteStatus;
 
   try {
-    await setQuoteStatus(db, id, next);
+    const freeze =
+      next === "confirmed"
+        ? { cat: await loadCatalogue(db), settings: await loadSettings(db) }
+        : undefined;
+    await setQuoteStatus(db, id, next, freeze);
   } catch (err) {
     return failed(message(err));
   }

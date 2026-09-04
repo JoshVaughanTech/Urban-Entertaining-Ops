@@ -136,6 +136,8 @@ Seven suites:
 - **CSV import** — parsing and row-level validation.
 - **Quote lifecycle** — sequential refs under a row lock, derived lines, draft-only editing,
   the allowed status transitions, and a sent snapshot that does not move when prices do.
+  Confirming is reachable from any other status, as the mockup has it; a draft confirmed
+  without ever being sent is frozen at that moment.
 - **Client document and PDF** — what the client sees, built from the snapshot once sent,
   plus a real PDF render and the public-link rules.
 - **Purchase-order CSV** — quoting, escaping, and a round trip back through the importer's

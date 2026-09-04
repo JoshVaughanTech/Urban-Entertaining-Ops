@@ -218,66 +218,63 @@ export type PreparedSend = {
   clientEmail: string | null;
 };
 
-/** Works out exactly what would be frozen, and reads nothing back.
- *
- *  Split from the write on purpose: the PDF that gets emailed is rendered
- *  from this snapshot, and only once the email has actually gone does
- *  markSent persist it. A quote is never left saying "sent" because an
- *  email bounced. */
-export async function prepareSend(
-  db: Db,
+/** Freezes a quote's current state. Used both when sending and when
+ *  confirming straight from a draft — either way, once a quote leaves draft
+ *  it stops being costed live. Runs inside a caller's transaction. */
+async function snapshotFor(
+  tx: Db,
   quoteId: string,
   cat: Catalogue,
   settings: Settings,
-): Promise<PreparedSend> {
-  return db.transaction(async (tx) => {
-    const [row] = await tx
-      .select()
-      .from(s.quotes)
-      .where(eq(s.quotes.id, quoteId))
-      .limit(1);
+): Promise<{
+  snapshot: ReturnType<typeof buildSnapshot>;
+  clientName: string;
+  clientEmail: string | null;
+  publicToken: string | null;
+}> {
+  const [row] = await tx.select().from(s.quotes).where(eq(s.quotes.id, quoteId)).limit(1);
 
-    if (!row) throw new QuoteError("That quote no longer exists.");
-    if (row.status !== "draft") throw new QuoteError("This quote has already been sent.");
-    if (!row.packageId) throw new QuoteError("A quote needs a package before it can be sent.");
+  if (!row) throw new QuoteError("That quote no longer exists.");
+  if (!row.packageId) throw new QuoteError("A quote needs a package before it can be frozen.");
 
-    const [event] = await tx
-      .select()
-      .from(s.events)
-      .where(eq(s.events.id, row.eventId))
-      .limit(1);
+  const [event] = await tx
+    .select()
+    .from(s.events)
+    .where(eq(s.events.id, row.eventId))
+    .limit(1);
 
-    if (!event) throw new QuoteError("The event behind this quote is missing.");
+  if (!event) throw new QuoteError("The event behind this quote is missing.");
 
-    const pkg = cat.packages.get(row.packageId);
-    if (!pkg) throw new QuoteError("That package no longer exists.");
+  const pkg = cat.packages.get(row.packageId);
+  if (!pkg) throw new QuoteError("That package no longer exists.");
 
-    const addonRows = await tx
-      .select({ addonId: s.quoteAddons.addonId })
-      .from(s.quoteAddons)
-      .where(eq(s.quoteAddons.quoteId, quoteId));
+  const addonRows = await tx
+    .select({ addonId: s.quoteAddons.addonId })
+    .from(s.quoteAddons)
+    .where(eq(s.quoteAddons.quoteId, quoteId));
 
-    const addons = addonRows.flatMap((a: { addonId: string }) => {
-      const addon = cat.addons.get(a.addonId);
-      return addon ? [addon] : [];
-    });
+  const addons = addonRows.flatMap((a: { addonId: string }) => {
+    const addon = cat.addons.get(a.addonId);
+    return addon ? [addon] : [];
+  });
 
-    const lineRows = await tx
-      .select()
-      .from(s.quoteLines)
-      .where(eq(s.quoteLines.quoteId, quoteId))
-      .orderBy(s.quoteLines.sort);
+  const lineRows = await tx
+    .select()
+    .from(s.quoteLines)
+    .where(eq(s.quoteLines.quoteId, quoteId))
+    .orderBy(s.quoteLines.sort);
 
-    const lines: QuoteLine[] = lineRows.map((l: typeof s.quoteLines.$inferSelect) => ({
-      sort: l.sort,
-      label: l.label,
-      qty: Number(l.qty),
-      unitPrice: l.unitPrice,
-      source: l.source,
-      ...(l.addonId ? { addonId: l.addonId } : {}),
-    }));
+  const lines: QuoteLine[] = lineRows.map((l: typeof s.quoteLines.$inferSelect) => ({
+    sort: l.sort,
+    label: l.label,
+    qty: Number(l.qty),
+    unitPrice: l.unitPrice,
+    source: l.source,
+    ...(l.addonId ? { addonId: l.addonId } : {}),
+  }));
 
-    const snapshot = buildSnapshot({
+  return {
+    snapshot: buildSnapshot({
       pkg,
       event: {
         clientName: event.clientName,
@@ -294,16 +291,43 @@ export async function prepareSend(
       lines,
       settings,
       cat,
-    });
+    }),
+    clientName: event.clientName,
+    clientEmail: event.contactEmail,
+    publicToken: row.publicToken,
+  };
+}
 
-    // URL-safe, unguessable, and only ever handed out with the quote.
-    const token = row.publicToken ?? randomBytes(24).toString("base64url");
+/** Works out exactly what would be frozen, and reads nothing back.
+ *
+ *  Split from the write on purpose: the PDF that gets emailed is rendered
+ *  from this snapshot, and only once the email has actually gone does
+ *  markSent persist it. A quote is never left saying "sent" because an
+ *  email bounced. */
+export async function prepareSend(
+  db: Db,
+  quoteId: string,
+  cat: Catalogue,
+  settings: Settings,
+): Promise<PreparedSend> {
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .select({ status: s.quotes.status })
+      .from(s.quotes)
+      .where(eq(s.quotes.id, quoteId))
+      .limit(1);
+
+    if (!row) throw new QuoteError("That quote no longer exists.");
+    if (row.status !== "draft") throw new QuoteError("This quote has already been sent.");
+
+    const frozen = await snapshotFor(tx, quoteId, cat, settings);
 
     return {
-      snapshot,
-      token,
-      clientName: event.clientName,
-      clientEmail: event.contactEmail,
+      snapshot: frozen.snapshot,
+      // URL-safe, unguessable, and only ever handed out with the quote.
+      token: frozen.publicToken ?? randomBytes(24).toString("base64url"),
+      clientName: frozen.clientName,
+      clientEmail: frozen.clientEmail,
     };
   });
 }
@@ -351,23 +375,32 @@ export async function sendQuote(
   return { token: prepared.token };
 }
 
+/* Confirming is reachable from every other status, matching the mockup,
+   which offers "Mark confirmed" on anything not already confirmed. Staff
+   confirm over the phone all the time, often before the quote has formally
+   been sent, and a mis-click on cancel should be recoverable. */
 const ALLOWED_TRANSITIONS: Record<QuoteStatus, QuoteStatus[]> = {
-  draft: ["cancelled"],
+  draft: ["confirmed", "cancelled"],
   sent: ["confirmed", "declined", "cancelled"],
   confirmed: ["cancelled"],
-  declined: ["cancelled"],
-  cancelled: [],
+  declined: ["confirmed", "cancelled"],
+  cancelled: ["confirmed"],
 };
 
-/** Status is the one thing that still moves after a quote is sent. */
+/** Status is the one thing that still moves once a quote leaves draft.
+ *
+ *  Pass `freeze` when confirming: a quote confirmed straight from a draft
+ *  never went through sending, so it has no snapshot, and the data model
+ *  says a confirmed quote renders from one. This is where that gets written. */
 export async function setQuoteStatus(
   db: Db,
   quoteId: string,
   next: QuoteStatus,
+  freeze?: { cat: Catalogue; settings: Settings },
 ): Promise<void> {
   await db.transaction(async (tx) => {
     const [row] = await tx
-      .select({ status: s.quotes.status })
+      .select({ status: s.quotes.status, snapshot: s.quotes.snapshot })
       .from(s.quotes)
       .where(eq(s.quotes.id, quoteId))
       .limit(1);
@@ -381,11 +414,21 @@ export async function setQuoteStatus(
       throw new QuoteError(`A ${current} quote cannot be marked ${next}.`);
     }
 
+    /* Confirmed without ever being sent: freeze it now, so ordering and the
+       quote screen read the same fixed figures as any other confirmed quote. */
+    const snapshot =
+      next === "confirmed" && !row.snapshot && freeze
+        ? (await snapshotFor(tx, quoteId, freeze.cat, freeze.settings)).snapshot
+        : null;
+
     await tx
       .update(s.quotes)
       .set({
         status: next,
-        confirmedAt: next === "confirmed" ? new Date() : null,
+        /* Stamped on confirm and then left alone: cancelling a confirmed quote
+           should not erase the record of when it was won. */
+        ...(next === "confirmed" ? { confirmedAt: new Date() } : {}),
+        ...(snapshot ? { snapshot } : {}),
         updatedAt: new Date(),
       })
       .where(eq(s.quotes.id, quoteId));

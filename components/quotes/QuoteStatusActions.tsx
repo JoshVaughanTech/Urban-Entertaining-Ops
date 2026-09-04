@@ -9,14 +9,20 @@ import type { QuoteStatus } from "@/lib/quotes/types";
 
 const NEXT_STEPS: Record<QuoteStatus, { status: QuoteStatus; label: string; primary?: boolean }[]> =
   {
-    draft: [{ status: "cancelled", label: "Cancel quote" }],
+    draft: [
+      { status: "confirmed", label: "Mark confirmed", primary: true },
+      { status: "cancelled", label: "Cancel quote" },
+    ],
     sent: [
       { status: "confirmed", label: "Mark confirmed", primary: true },
       { status: "declined", label: "Mark declined" },
     ],
     confirmed: [{ status: "cancelled", label: "Cancel quote" }],
-    declined: [{ status: "cancelled", label: "Cancel quote" }],
-    cancelled: [],
+    declined: [
+      { status: "confirmed", label: "Mark confirmed" },
+      { status: "cancelled", label: "Cancel quote" },
+    ],
+    cancelled: [{ status: "confirmed", label: "Mark confirmed" }],
   };
 
 /** Status is the only thing that moves on a quote once it has been sent. */

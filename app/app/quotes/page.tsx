@@ -110,7 +110,7 @@ export default async function QuotesPage({
                     </span>
                   </td>
                   <td className={ui.num}>
-                    {quote.status === "sent" ? <ConfirmButton id={quote.id} /> : null}
+                    {quote.status !== "confirmed" ? <ConfirmButton id={quote.id} /> : null}
                   </td>
                 </tr>
               ))}

@@ -230,11 +230,46 @@ describe("status", () => {
     expect(quote!.confirmedAt).toBeInstanceOf(Date);
   });
 
-  it("refuses to confirm a quote the client never received", async () => {
+  /* The mockup offers "Mark confirmed" on anything not already confirmed,
+     including a draft — staff confirm over the phone before sending. */
+  it("confirms a draft directly, as the mockup does", async () => {
     const { id } = await createQuote(db, input(), cat, settings, null);
-    await expect(setQuoteStatus(db, id, "confirmed")).rejects.toThrow(
-      /draft quote cannot be marked confirmed/,
-    );
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+
+    const quote = await loadQuote(db, id);
+    expect(quote!.status).toBe("confirmed");
+    expect(quote!.confirmedAt).toBeInstanceOf(Date);
+  });
+
+  it("freezes a snapshot when a draft is confirmed without ever being sent", async () => {
+    const { id } = await createQuote(db, input({ addonIds: [barAddonId] }), cat, settings, null);
+    expect((await loadQuote(db, id))!.snapshot).toBeNull();
+
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+
+    const quote = await loadQuote(db, id);
+    expect(quote!.snapshot, "a confirmed quote must render from a snapshot").not.toBeNull();
+    expect(quote!.snapshot!.totals.total).toBe(toCents(80 * 82 + 80 * 18 + 4 * 76.8));
+    // Never sent, so no client link was ever issued.
+    expect(quote!.publicToken).toBeNull();
+    expect(quote!.sentAt).toBeNull();
+  });
+
+  it("leaves an existing snapshot alone when confirming a sent quote", async () => {
+    const { id } = await createQuote(db, input(), cat, settings, null);
+    await sendQuote(db, id, cat, settings);
+    const before = (await loadQuote(db, id))!.snapshot;
+
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+
+    expect((await loadQuote(db, id))!.snapshot).toEqual(before);
+  });
+
+  it("can recover a quote cancelled by mistake", async () => {
+    const { id } = await createQuote(db, input(), cat, settings, null);
+    await setQuoteStatus(db, id, "cancelled");
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+    expect((await loadQuote(db, id))!.status).toBe("confirmed");
   });
 
   it("refuses to decline a quote that was already confirmed", async () => {
@@ -242,6 +277,18 @@ describe("status", () => {
     await sendQuote(db, id, cat, settings);
     await setQuoteStatus(db, id, "confirmed");
     await expect(setQuoteStatus(db, id, "declined")).rejects.toThrow(/cannot be marked declined/);
+  });
+
+  it("keeps the confirmation date when a confirmed quote is later cancelled", async () => {
+    const { id } = await createQuote(db, input(), cat, settings, null);
+    await setQuoteStatus(db, id, "confirmed", { cat, settings });
+    const confirmedAt = (await loadQuote(db, id))!.confirmedAt;
+
+    await setQuoteStatus(db, id, "cancelled");
+
+    const after = await loadQuote(db, id);
+    expect(after!.status).toBe("cancelled");
+    expect(after!.confirmedAt).toEqual(confirmedAt);
   });
 
   it("lets anything be cancelled", async () => {
