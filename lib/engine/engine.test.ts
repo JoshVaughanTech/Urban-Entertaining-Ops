@@ -7,6 +7,7 @@ import { money, moneyPrecise, percent, shortDate, addDays } from "./format";
 import { groupBySupplier, ingredientRollup, rollupTotalCost } from "./ordering";
 import {
   buildQuoteLines,
+  clientDiscount,
   extraHours,
   foodCostPerHead,
   gstComponent,
@@ -516,5 +517,43 @@ describe("formatting", () => {
     expect(shortDate("2026-09-12")).toBe("12 Sept");
     expect(addDays("2026-09-12", 14)).toBe("2026-09-26");
     expect(addDays("2026-12-28", 5)).toBe("2027-01-02");
+  });
+});
+
+/* ── a client's standing discount ─────────────────────────────────────────
+   Only ever a pre-fill for a new quote. That it must not touch a sent one is
+   covered in lib/data/client-freeze.test.ts. */
+
+describe("clientDiscount", () => {
+  it("takes the percentage off the subtotal, in whole cents", () => {
+    expect(clientDiscount(100_00, 10)).toBe(10_00);
+    expect(clientDiscount(256_000, 10)).toBe(25_600);
+  });
+
+  it("rounds to the nearest cent rather than leaving a fraction", () => {
+    // 12345 * 0.075 = 925.875
+    expect(clientDiscount(12_345, 7.5)).toBe(926);
+    expect(Number.isInteger(clientDiscount(9_999, 33))).toBe(true);
+  });
+
+  it("is nothing at zero percent", () => {
+    expect(clientDiscount(100_00, 0)).toBe(0);
+  });
+
+  it("is the whole subtotal at a hundred percent, never more", () => {
+    expect(clientDiscount(100_00, 100)).toBe(100_00);
+    // Clamped, so a bad form post cannot produce a negative total.
+    expect(clientDiscount(100_00, 250)).toBe(100_00);
+  });
+
+  it("refuses a negative or non-finite percentage", () => {
+    expect(clientDiscount(100_00, -10)).toBe(0);
+    expect(clientDiscount(100_00, Number.NaN)).toBe(0);
+    expect(clientDiscount(100_00, Number.POSITIVE_INFINITY)).toBe(0);
+  });
+
+  it("is nothing on an empty or negative subtotal", () => {
+    expect(clientDiscount(0, 10)).toBe(0);
+    expect(clientDiscount(-500, 10)).toBe(0);
   });
 });

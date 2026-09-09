@@ -152,6 +152,21 @@ export function quoteTotals(input: {
   };
 }
 
+/** A client's standing discount, as cents off this subtotal.
+ *
+ *  This is only ever a **pre-fill for a new quote**. A sent quote's discount is
+ *  frozen in its snapshot, and applying a client's current percentage to one
+ *  would reprice a quote the client is already holding — see
+ *  `lib/data/client-freeze.test.ts`.
+ *
+ *  The percentage is clamped rather than trusted: the column is constrained to
+ *  0..100, but this also runs against whatever a form posted. */
+export function clientDiscount(subtotal: Cents, discountPct: number): Cents {
+  if (!Number.isFinite(discountPct) || discountPct <= 0) return 0;
+  if (subtotal <= 0) return 0;
+  return Math.round(subtotal * (Math.min(100, discountPct) / 100));
+}
+
 /** Prices are GST inclusive, so the tax is a fraction of the total, not a
  *  markup on top of it. */
 export const gstComponent = (totalIncGst: Cents, rate: number): Cents =>
