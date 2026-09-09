@@ -132,7 +132,7 @@ server first, or expect the odd transient build failure. Supabase has no such li
 npm test
 ```
 
-Twelve suites, all runnable with no credentials and no network:
+Thirteen suites, all runnable with no credentials and no network:
 
 - **Engine** — checked against golden values produced by running the approved mockup's own
   functions over its own data. If a number here changes, the app has stopped agreeing with
@@ -146,8 +146,16 @@ Twelve suites, all runnable with no credentials and no network:
   parser, so the two CSV modules cannot drift apart.
 
 Migrations are generated, never hand-written: edit `lib/db/schema.ts`, then
-`npm run db:generate`. Three so far: `0000_init`, `0001_order_window_unique`,
-`0002_app_users_allowlist`, `0003_viewer_role`.
+`npm run db:generate`. Five so far: `0000_init`, `0001_order_window_unique`,
+`0002_app_users_allowlist`, `0003_viewer_role`, `0004_clients`. Rename the file
+drizzle-kit generates to say what it does, and update its `tag` in
+`drizzle/meta/_journal.json` to match.
+
+**`0004_clients` is the one exception to "never hand-written".** drizzle-kit emits DDL
+only, so its backfill — one client per distinct `events.client_name` — is appended by
+hand below the generated statements. Data migrations have to be. `lib/db/clients-backfill.test.ts`
+covers it by migrating as far as 0003, writing events, and only then applying 0004; a
+plain `migrate()` would sweep an empty table and prove nothing.
 
 ## Design
 

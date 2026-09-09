@@ -43,6 +43,10 @@ export const quoteLineSourceEnum = pgEnum("quote_line_source", [
   "custom",
 ]);
 export const orderStatusEnum = pgEnum("order_status", ["draft", "placed"]);
+/* Corporate accounts book through one person, hold the event with another and
+   pay through a third. One contact per role, and one of them flagged primary
+   as the address a quote goes to. */
+export const contactRoleEnum = pgEnum("contact_role", ["booker", "on_site", "billing"]);
 /* viewer is read-only: it can see everything and change nothing, which is
    what a demo account should be. A deviation from the brief's two roles,
    added deliberately. */
@@ -236,12 +240,77 @@ export const settings = pgTable(
   (t) => [check("settings_singleton", sql`${t.id} = 1`)],
 );
 
+/* ── clients ───────────────────────────────────────────────────────────
+   What the office learned last time. `discountPct` is the client's standing
+   discount and is the *only* thing here that touches money — deliberately a
+   percentage rather than an agreed per-head rate, so a price still lives in
+   exactly one place and cannot go stale against the catalogue.
+
+   `preferences` and `staffNotes` are internal operational memory. They surface
+   in the quote builder and never reach the client-facing document.
+
+   See docs/plans/2026-09-10-client-database-design.md. */
+
+export const clients = pgTable(
+  "clients",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    discountPct: integer("discount_pct").notNull().default(0),
+    preferences: text("preferences"),
+    staffNotes: text("staff_notes"),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    /* Case-insensitive, so "Harper & Co" and "harper & co" cannot both exist.
+       Two genuinely different "Smith Wedding" clients have to be told apart by
+       name, which beats silently accruing duplicates. */
+    uniqueIndex("clients_name_lower_idx").on(sql`lower(${t.name})`),
+    check("clients_discount_pct_range", sql`${t.discountPct} between 0 and 100`),
+  ],
+);
+
+export const clientContacts = pgTable(
+  "client_contacts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
+    role: contactRoleEnum("role").notNull().default("booker"),
+    name: text("name").notNull(),
+    email: text("email"),
+    phone: text("phone"),
+    isPrimary: boolean("is_primary").notNull().default(false),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    index("client_contacts_client_idx").on(t.clientId),
+    /* At most one primary per client. A partial unique index rather than a
+       check, because the constraint is across rows. */
+    uniqueIndex("client_contacts_one_primary_idx")
+      .on(t.clientId)
+      .where(sql`${t.isPrimary}`),
+  ],
+);
+
 /* ── events & quotes ───────────────────────────────────────────────────── */
 
 export const events = pgTable(
   "events",
   {
     id: uuid("id").primaryKey().defaultRandom(),
+    /* Nullable so the backfill cannot fail on unexpected data, and so a legacy
+       row survives. createQuote always sets it, but read paths must still cope
+       with a null rather than assuming a client. */
+    clientId: uuid("client_id").references(() => clients.id, { onDelete: "restrict" }),
+    /* Stays alongside clientId, and that is the freeze rule rather than
+       redundancy: rename a client next year and every quote they are already
+       holding must keep the name it was sent under. contactEmail is the same —
+       pre-filled from the primary contact, but once written it records where
+       *this* quote actually went. Do not "tidy" either into a join. */
     clientName: text("client_name").notNull(),
     contactEmail: text("contact_email"),
     eventDate: date("event_date", { mode: "string" }).notNull(),
@@ -256,6 +325,7 @@ export const events = pgTable(
   },
   (t) => [
     index("events_date_idx").on(t.eventDate),
+    index("events_client_idx").on(t.clientId),
     check("events_guests_positive", sql`${t.guests} > 0`),
   ],
 );

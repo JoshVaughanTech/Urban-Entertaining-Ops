@@ -29,6 +29,13 @@
       "when": 1788504938885,
       "tag": "0003_viewer_role",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788997157587,
+      "tag": "0004_clients",
+      "breakpoints": true
     }
   ]
 }
