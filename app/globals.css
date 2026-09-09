@@ -1,12 +1,33 @@
-/* Design tokens. These are the palette from the approved mockup, not suggestions.
+/* Design tokens.
+
+   The brand — navy, off-white, the type families — is taken from the live Urban
+   Entertaining site (urbanentertaining.com.au), whose own custom properties are
+   mirrored here under the names this app already used. The mockup's warm
+   green-and-cream palette that it replaces is in git history.
+
    Everything else in the app styles itself with CSS Modules off these variables. */
 
 :root {
-  --bg: #F3F1EC;
-  --paper: #FFFFFF;
-  --line: #DDD8CE;
-  --ink: #1F1D19;
-  --muted: #7A756B;
+  /* --- Brand, from the website ------------------------------------------- */
+  --navy: #16263F;      /* site --navy / --ink / --accent */
+  --navy-700: #0E1B2E;  /* site --navy-700, for hover on navy */
+  --accent: var(--navy);
+  --on-accent: #FFFFFF;
+
+  --bg: #FCFBF9;        /* site --paper: the page ground */
+  --paper: #FFFFFF;     /* site --card: raised surfaces */
+  --ink: var(--navy);
+  --muted: #5B6C86;     /* site --muted */
+  --line: rgba(22, 38, 63, 0.14);      /* site --line */
+  --line-soft: rgba(22, 38, 63, 0.07); /* site --line-soft */
+  --ph-bg: #EAEDF2;     /* site --ph-bg: inert / placeholder fill */
+
+  /* --- Status -------------------------------------------------------------
+     The website is marketing copy and carries no status palette, so these stay
+     the mockup's rather than being invented. Forest, brass and claret are a
+     conventional navy pairing and still read as good / waiting / bad against
+     it — which navy itself no longer can, now that it is the brand colour and
+     so carries no signal of its own. */
   --green: #2F4A3A;
   --green-soft: #E6ECE7;
   --amber: #8A5A16;
@@ -14,14 +35,12 @@
   --red: #8C3A2E;
   --red-soft: #F4E3DF;
 
-  /* row separator inside tables — a lighter tint of --line */
-  --line-soft: #EEEAE2;
-
   --radius: 8px;
   --radius-sm: 6px;
 
-  --font-display: var(--font-cormorant), Georgia, "Times New Roman", serif;
-  --font-body: var(--font-mulish), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-body: var(--font-mulish), "Mulish", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-brand: var(--font-montserrat), "Montserrat", system-ui, sans-serif;
 }
 
 *,
@@ -65,11 +84,18 @@ a {
   color: inherit;
 }
 
+/* Left to the browser until now, which renders it a warm grey that reads as a
+   different palette next to the navy. */
+::placeholder {
+  color: var(--muted);
+  opacity: 0.65;
+}
+
 /* The mockup has no focus treatment. The web needs one — this is a
    deliberate, documented deviation (handover: "deviate only where the
    web needs it"). */
 :focus-visible {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 3px;
 }

@@ -90,6 +90,16 @@ wrapper over it.
   nothing reads it. Middleware forwards `?code=`/`?token_hash=` from `/` and `/login` to the
   callback. Only those two paths: forwarding blindly would let a stray query parameter
   hijack `/q/[token]`, which belongs to a client.
+- **@react-pdf fails silently on assets it cannot load.** Given a `src` string that is not
+  an http URL it still calls `fetch()`, which on a local file path throws — and the render
+  carries on and emits a perfectly valid PDF with the image simply missing. A font that
+  fails to register falls back to Helvetica just as quietly. So "it produced a PDF" proves
+  nothing: pass images as `{ data: Buffer, format }`, and let `lib/pdf/assets.test.ts`
+  assert what actually got embedded.
+- **Files read at request time need `outputFileTracingIncludes`.** The PDF reads the brand
+  fonts and the mark off disk. Next cannot trace a path built with `path.join`, so
+  `next.config.ts` declares them; without it the build is green and the deployed route
+  throws ENOENT.
 - **Screens under `/app` must not be prerendered** — they read session cookies and live
   data. The layout sets `dynamic = "force-dynamic"`.
 
@@ -122,7 +132,7 @@ server first, or expect the odd transient build failure. Supabase has no such li
 npm test
 ```
 
-Eleven suites, all runnable with no credentials and no network:
+Twelve suites, all runnable with no credentials and no network:
 
 - **Engine** — checked against golden values produced by running the approved mockup's own
   functions over its own data. If a number here changes, the app has stopped agreeing with
@@ -146,8 +156,20 @@ behaviour**; `CLAUDE_HANDOVER.md` wins on the **data model**. Where they conflic
 noted in the code at the point of conflict.
 
 Don't redesign. Deviate only where the web genuinely needs it — focus rings, responsive
-stacking, loading states — and comment where you do. The mockup's palette in
-`app/globals.css` is the palette, not a suggestion.
+stacking, loading states — and comment where you do.
+
+**The palette is the live website's, not the mockup's** (client's instruction, 10 September
+2026). `app/globals.css` mirrors urbanentertaining.com.au's own custom properties — navy
+`#16263F`, off-white `#FCFBF9`, slate `#5B6C86` — under the token names this app already
+used, and the nav is navy with white ink the way the site's is. Cormorant Garamond and
+Mulish were already right; Montserrat joins them for the wordmark only.
+
+Two things that were one token in the mockup are now two. `--accent` is the brand colour and
+drives focus rings, the active nav item and selection; `--green` stayed forest and means
+*confirmed*, because navy can no longer signal success once everything is navy. The website
+is marketing copy and carries no status palette, so amber and red are still the mockup's.
+
+Neither is a suggestion. If you need a new colour, take it from the site.
 
 ## Access
 
@@ -213,6 +235,14 @@ it is what the kitchen can cook rather than a property of a listed dish.
 - **The screens have been walked once, against the local database** (4 September 2026):
   packages, ordering, the quote builder, the quotes list and the client preview all render
   correctly, and the PDF route returns a real PDF. Not yet walked: the catalogue edit forms,
-  CSV import, settings, and the public /q/[token] page. Nothing has been seen against
-  Supabase itself.
+  CSV import, and settings. Nothing has been seen against Supabase itself.
+- **The rebrand has been seen on two screens only** (10 September 2026): `/login` and the
+  public `/q/[token]`, which is the first time that page has been looked at at all. Both
+  render correctly. Everything behind sign-in — the **navy nav in particular** — is
+  typechecked and its CSS verified served, but nobody has laid eyes on it, and the walk on
+  4 September predates the new palette. Treat the `/app` screens as unseen under this theme.
+- **The PDF has not been seen either.** `lib/pdf/assets.test.ts` proves the real fonts and
+  the mark are embedded and that no fallback face survives, but no one has looked at the
+  page: headless Chrome will not rasterise a PDF and there is no poppler on the dev machine.
+  Layout is unchanged from the version that was walked, so the risk is small, not zero.
 - Outstanding client-supplied items are tabled at the end of `README.md`.

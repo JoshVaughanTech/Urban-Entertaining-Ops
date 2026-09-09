@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Mulish } from "next/font/google";
+import { Cormorant_Garamond, Montserrat, Mulish } from "next/font/google";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -17,6 +17,15 @@ const mulish = Mulish({
   display: "swap",
 });
 
+/* The website sets its wordmark in Montserrat, apart from both the display and
+   the body face. It is used here only for the brand lockup in the nav. */
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Urban Entertaining — Operations",
@@ -29,7 +38,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-AU" className={`${cormorant.variable} ${mulish.variable}`}>
+    <html
+      lang="en-AU"
+      className={`${cormorant.variable} ${mulish.variable} ${montserrat.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

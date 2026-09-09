@@ -8,10 +8,10 @@ export function QuoteDocumentView({ doc }: { doc: QuoteDocument }) {
   return (
     <article className={styles.sheet}>
       <div className={styles.brandRow}>
-        {/* Placeholder until Josh supplies the mark. */}
-        <div className={styles.logo} aria-hidden="true">
-          LOGO
-        </div>
+        {/* The navy mark, not the white one: this sheet is client-facing and
+            renders on paper. Both are the site's logo-mono.png artwork. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-navy.png" alt="" className={styles.logo} aria-hidden="true" />
         <div className={styles.brand}>{doc.brand}</div>
       </div>
 

@@ -204,13 +204,18 @@ Sending is deliberately ordered: prepare the snapshot → render the PDF from it
 *only then* mark the quote sent. A quote is never left saying "sent" because an email
 bounced.
 
-**Two things are stubbed pending assets from Josh:**
+**The brand assets are real, both taken from the live site** (10 September 2026):
 
-- **The logo** is a dashed placeholder box in both the HTML and the PDF. Drop the real mark
-  into `components/quotes/QuoteDocumentView.tsx` and `lib/pdf/QuotePdf.tsx`.
-- **PDF fonts** are the built-in Times-Roman and Helvetica, standing in for Cormorant
-  Garamond and Mulish. `@react-pdf` needs font *files*, not a webfont stylesheet. Follow the
-  three steps in `registerBrandFonts()` in `lib/pdf/QuotePdf.tsx` once the `.ttf` files exist.
+- **The logo** is `public/logo-mono.png`, the site's own mark. It is white artwork on
+  transparency, so it works only on the navy nav; `public/logo-navy.png` is the same
+  artwork recoloured for light surfaces, which is what the quote and the PDF use.
+- **PDF fonts** are the real Cormorant Garamond and Mulish, in `assets/fonts/`, pulled from
+  Google Fonts and both SIL Open Font License. `registerBrandFonts()` loads them off disk,
+  and `next.config.ts` traces that directory into the serverless bundle — without which the
+  PDF route builds fine and then throws once deployed.
+
+`lib/pdf/assets.test.ts` asserts the fonts and the mark are actually embedded, because
+@react-pdf drops what it cannot use *silently* and still emits a valid PDF.
 
 ## Ordering
 
@@ -276,6 +281,4 @@ Tracked here so nothing is quietly assumed:
 | Supabase project + keys | Nothing runs without it | `.env.local` |
 | Resend API key + verified sender | Quotes and purchase orders cannot email | `.env.local` |
 | Supplier contact emails | Purchase orders skip suppliers without one | `/app/suppliers` |
-| UE logo | Placeholder box on the quote and PDF | `QuoteDocumentView.tsx`, `QuotePdf.tsx` |
-| Cormorant Garamond + Mulish `.ttf` | PDF falls back to Times/Helvetica | `registerBrandFonts()` |
 | Real staff cost and charge-out rates | Seeded from the mockup: $48 and $76.80 | `/app/settings` |

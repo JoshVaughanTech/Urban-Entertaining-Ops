@@ -8,7 +8,7 @@
   max-width: 640px;
 }
 
-/* Logo slot. Drop a real mark in here and the wordmark falls away. */
+/* The website's lockup: mark plus wordmark, the wordmark in Montserrat. */
 .brandRow {
   display: flex;
   align-items: center;
@@ -19,18 +19,14 @@
 .logo {
   width: 34px;
   height: 34px;
-  border: 1px dashed var(--line);
-  border-radius: 4px;
-  display: grid;
-  place-items: center;
-  font-size: 9px;
-  color: var(--muted);
   flex-shrink: 0;
 }
 
 .brand {
-  font-family: var(--font-display);
-  font-size: 14px;
+  font-family: var(--font-brand);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--muted);
 }
 

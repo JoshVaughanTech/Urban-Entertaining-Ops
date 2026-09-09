@@ -19,7 +19,7 @@
 }
 
 .draft {
-  background: #EEEAE2;
+  background: var(--ph-bg);
   color: var(--muted);
 }
 

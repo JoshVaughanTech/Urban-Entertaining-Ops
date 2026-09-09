@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { Card, Notice } from "@/components/ui";
 import { HashSession } from "@/components/auth/HashSession";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -26,9 +28,20 @@ export default async function LoginPage({
   return (
     <div className={styles.wrap}>
       <div className={styles.panel}>
+        {/* Navy mark: this page sits on the light ground, not the nav. */}
         <div className={styles.brand}>
-          Urban Entertaining
-          <small>Operations</small>
+          <Image
+            src="/logo-navy.png"
+            alt=""
+            width={105}
+            height={105}
+            className={styles.mark}
+            priority
+          />
+          <span>
+            Urban Entertaining
+            <small>Operations</small>
+          </span>
         </div>
 
         {configured ? (

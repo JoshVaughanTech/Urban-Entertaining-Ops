@@ -1,6 +1,7 @@
 "use client";
 
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
@@ -44,9 +45,22 @@ export function Sidebar({ email }: { email: string }) {
 
   return (
     <nav className={styles.nav} aria-label="Sections">
+      {/* The website's lockup: the mono mark on navy, wordmark in Montserrat.
+          logo-mono.png is white artwork, so it only works on the dark nav —
+          light surfaces use logo-navy.png instead. */}
       <Link href="/app/quotes/new" className={styles.brand}>
-        Urban Entertaining
-        <small>Operations</small>
+        <Image
+          src="/logo-mono.png"
+          alt=""
+          width={105}
+          height={105}
+          className={styles.mark}
+          priority
+        />
+        <span className={styles.wordmark}>
+          Urban Entertaining
+          <small>Operations</small>
+        </span>
       </Link>
 
       {PRIMARY.map(item)}

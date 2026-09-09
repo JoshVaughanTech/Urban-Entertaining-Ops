@@ -1,38 +1,73 @@
-import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+import { Document, Font, Image, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 
 import { longDate, money, moneyDeduction } from "@/lib/engine/format";
 import type { QuoteDocument } from "@/lib/quotes/document";
 
-/* ── fonts ──────────────────────────────────────────────────────────────
-   The app uses Cormorant Garamond and Mulish. @react-pdf cannot use a
-   webfont from CSS — it needs the font files themselves — and fetching them
-   at render time would put a network call in the middle of every download.
+/* ── fonts ──────────────────────────────────────────────────
+   The real brand faces, the same two the website serves. @react-pdf needs the
+   files themselves rather than a webfont stylesheet, so the .ttf files live in
+   assets/fonts/ — pulled from Google Fonts, both SIL Open Font License.
 
-   So the PDF ships with the built-in Times-Roman and Helvetica, which are
-   the closest stand-ins, and this hook swaps in the real thing the moment
-   the .ttf files are in the repo:
+   They are read off disk at render time, which is why next.config.ts traces
+   assets/fonts into the serverless bundle. Without that the PDF route builds
+   fine and then throws on Vercel, where the repo is not on disk. */
 
-     1. drop Cormorant-Garamond.ttf and Mulish.ttf into assets/fonts/
-     2. uncomment the two Font.register calls below
-     3. change DISPLAY / BODY to "Cormorant Garamond" / "Mulish"
+const FONT_DIR = path.join(process.cwd(), "assets", "fonts");
 
-   Flagged in the Phase 3 summary as a deliberate, reversible deviation. */
+let registered = false;
 
 export function registerBrandFonts() {
-  // Font.register({ family: "Cormorant Garamond", src: "assets/fonts/Cormorant-Garamond.ttf" });
-  // Font.register({ family: "Mulish", src: "assets/fonts/Mulish.ttf" });
+  // Font.register mutates a module-level registry; doing it twice is wasteful
+  // and, for the hyphenation callback, simply redundant.
+  if (registered) return;
+
+  Font.register({
+    family: "Cormorant Garamond",
+    fonts: [
+      { src: path.join(FONT_DIR, "CormorantGaramond-Medium.ttf"), fontWeight: 500 },
+      { src: path.join(FONT_DIR, "CormorantGaramond-SemiBold.ttf"), fontWeight: 600 },
+    ],
+  });
+
+  Font.register({
+    family: "Mulish",
+    fonts: [
+      { src: path.join(FONT_DIR, "Mulish-Regular.ttf"), fontWeight: 400 },
+      { src: path.join(FONT_DIR, "Mulish-Bold.ttf"), fontWeight: 700 },
+    ],
+  });
 
   // Stops react-pdf hyphenating mid-word, which looks wrong on a quote.
   Font.registerHyphenationCallback((word) => [word]);
+
+  registered = true;
 }
 
-const DISPLAY = "Times-Roman";
-const BODY = "Helvetica";
+const DISPLAY = "Cormorant Garamond";
+const BODY = "Mulish";
 
-const INK = "#1F1D19";
-const MUTED = "#7A756B";
-const LINE = "#DDD8CE";
-const LINE_SOFT = "#EEEAE2";
+/* The website palette. The two rules are the flat equivalents of its
+   translucent --line / --line-soft over white, since a quote prints on paper. */
+const INK = "#16263F";
+const MUTED = "#5B6C86";
+const LINE = "#DEE0E4";
+const LINE_SOFT = "#EFF0F2";
+
+/* The mark, handed to @react-pdf as bytes rather than a path. Given a string
+   it treats anything non-http as a URL and calls fetch(), which on a local
+   file path fails silently: the render succeeds and the logo is simply
+   absent. Passing { data, format } is the only form that reliably embeds. */
+const LOGO_PATH = path.join(process.cwd(), "public", "logo-navy.png");
+
+let logo: { data: Buffer; format: "png" } | undefined;
+
+function brandMark() {
+  if (!logo) logo = { data: readFileSync(LOGO_PATH), format: "png" };
+  return logo;
+}
 
 const styles = StyleSheet.create({
   page: {
@@ -45,18 +80,8 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
   brandRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 6 },
-  logo: {
-    width: 30,
-    height: 30,
-    borderWidth: 1,
-    borderColor: LINE,
-    borderStyle: "dashed",
-    borderRadius: 3,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  logoText: { fontSize: 6, color: MUTED },
-  brand: { fontFamily: DISPLAY, fontSize: 11, color: MUTED },
+  logo: { width: 30, height: 30 },
+  brand: { fontFamily: BODY, fontSize: 9, color: MUTED, letterSpacing: 0.3 },
   title: { fontFamily: DISPLAY, fontSize: 28, marginTop: 2 },
   ref: { fontSize: 9, color: MUTED },
   meta: { color: MUTED, marginTop: 8, marginBottom: 20 },
@@ -98,9 +123,9 @@ const styles = StyleSheet.create({
   },
 });
 
-/** Bold is expressed through the built-in bold face rather than a weight,
- *  because the stand-in families have no variable axis. */
-const bold = { fontFamily: BODY === "Helvetica" ? "Helvetica-Bold" : BODY };
+/** Mulish is registered at 400 and 700, so bold is a real weight now rather
+ *  than the separate Helvetica-Bold family the stand-in needed. */
+const bold = { fontWeight: 700 } as const;
 
 export function QuotePdf({ doc }: { doc: QuoteDocument }) {
   registerBrandFonts();
@@ -113,9 +138,7 @@ export function QuotePdf({ doc }: { doc: QuoteDocument }) {
     >
       <Page size="A4" style={styles.page}>
         <View style={styles.brandRow}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>LOGO</Text>
-          </View>
+          <Image src={brandMark()} style={styles.logo} />
           <Text style={styles.brand}>{doc.brand}</Text>
         </View>
 

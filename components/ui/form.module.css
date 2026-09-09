@@ -22,11 +22,11 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   color: var(--ink);
-  background: #FBFAF7;
+  background: var(--bg);
 }
 
 .control:focus {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
 

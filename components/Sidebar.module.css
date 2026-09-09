@@ -1,7 +1,10 @@
+/* The website's nav is navy with white ink; this mirrors it. globals.css
+   already inverts focus rings inside `nav`, which is what makes that safe. */
 .nav {
   width: 200px;
-  background: var(--paper);
-  border-right: 1px solid var(--line);
+  background: var(--navy);
+  color: var(--on-accent);
+  border-right: 1px solid var(--navy);
   padding: 22px 16px;
   display: flex;
   flex-direction: column;
@@ -10,23 +13,37 @@
 }
 
 .brand {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 6px 22px;
-  line-height: 1.1;
   text-decoration: none;
+  color: var(--on-accent);
 }
 
-.brand small {
+/* Intrinsic size is 105px square; rendered small and sharp. */
+.mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.wordmark {
+  font-family: var(--font-brand);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+
+.wordmark small {
   display: block;
   font-family: var(--font-body);
   font-size: 11px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.6);
   font-weight: 400;
   letter-spacing: 0;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
 .link {
@@ -35,22 +52,23 @@
   border: 0;
   background: none;
   border-radius: var(--radius-sm);
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.72);
   cursor: pointer;
   font-weight: 600;
   text-decoration: none;
   display: block;
+  width: 100%;
 }
 
 .link:hover:not(.on) {
-  background: var(--bg);
+  background: var(--navy-700);
+  color: var(--on-accent);
 }
 
 .on {
-  background: var(--green);
-  color: #fff;
+  background: var(--on-accent);
+  color: var(--navy);
 }
-
 .spacer {
   flex: 1;
 }
@@ -58,12 +76,13 @@
 .signOut {
   margin-top: 14px;
   padding-top: 14px;
-  border-top: 1px solid var(--line);
+  /* --line is a navy tint and vanishes here; the nav needs a light rule. */
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .email {
   font-size: 11px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.55);
   padding: 0 10px 6px;
   overflow-wrap: anywhere;
 }
@@ -75,7 +94,7 @@
     flex-wrap: wrap;
     padding: 12px;
     border-right: 0;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
   }
 
   .brand {

@@ -11,11 +11,21 @@
 }
 
 .brand {
-  font-family: var(--font-display);
-  font-size: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-brand);
+  font-size: 17px;
   font-weight: 600;
-  line-height: 1.1;
-  margin-bottom: 4px;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.mark {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
 }
 
 .brand small {
@@ -45,12 +55,12 @@
   padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
-  background: #FBFAF7;
+  background: var(--bg);
   margin-bottom: 12px;
 }
 
 .input:focus {
-  outline: 2px solid var(--green);
+  outline: 2px solid var(--accent);
   outline-offset: -1px;
 }
 
