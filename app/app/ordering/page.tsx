@@ -71,20 +71,29 @@ export default async function OrderingPage({
       <div className={ui.splitGrid}>
         <div className={ui.stack}>
           <Card title="Order window">
-            <form method="get" className={form.row}>
-              <div className={form.field}>
-                <label className={form.label} htmlFor="from">
-                  From
-                </label>
-                <input id="from" name="from" type="date" defaultValue={from} className={form.control} />
+            {/* Two fields to a row, not three. This column is a fixed 340px
+                track, which leaves ~94px per field once the card's padding is
+                taken off — narrower than a date input can render, and narrower
+                than "Update" can be. The row then overflowed, widening the card
+                past its own grid track and closing the gutter against the
+                supplier list. Dates side by side and the button beneath both
+                fit, and it matches how the quote builder pairs its fields. */}
+            <form method="get">
+              <div className={form.row}>
+                <div className={form.field}>
+                  <label className={form.label} htmlFor="from">
+                    From
+                  </label>
+                  <input id="from" name="from" type="date" defaultValue={from} className={form.control} />
+                </div>
+                <div className={form.field}>
+                  <label className={form.label} htmlFor="to">
+                    To
+                  </label>
+                  <input id="to" name="to" type="date" defaultValue={to} className={form.control} />
+                </div>
               </div>
               <div className={form.field}>
-                <label className={form.label} htmlFor="to">
-                  To
-                </label>
-                <input id="to" name="to" type="date" defaultValue={to} className={form.control} />
-              </div>
-              <div className={form.field} style={{ display: "flex", alignItems: "flex-end" }}>
                 <button type="submit" className={buttonClass("ghost")}>
                   Update
                 </button>
