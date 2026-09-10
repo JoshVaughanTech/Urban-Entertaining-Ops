@@ -57,19 +57,17 @@ explains what is missing. No key is ever faked or defaulted.
 
 ### Before Supabase exists
 
-`npm run db:dev` runs a throwaway Postgres locally so the app has real data to render. It
-serves one connection at a time, so point `.env.local` at it and pin the pool:
+`npm run db:dev` runs a throwaway Postgres locally so the app has real data to render.
+Point `.env.local` at it:
 
 ```
 DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres
-DATABASE_POOL_MAX=1
-DATABASE_IDLE_TIMEOUT=0
 ```
 
 Signing in still needs a real Supabase project — this covers the data, not the auth.
 
-The local database serves **one connection at a time**, so stop `npm run dev` before running
-a build or another seed against it, or they will fail with ECONNRESET.
+It serves 20 connections, so scripts, seeds and migrations can run alongside `npm run dev`.
+(`npm run build` still cannot: that is a fight over `.next`, not the database.)
 
 ## Commands
 

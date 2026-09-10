@@ -68,7 +68,8 @@ wrapper over it.
   renders JSX fails with "React is not defined".
 - **The driver is `node-postgres`, not `postgres.js`.** postgres.js could not talk to a
   local Postgres-wire test server; `pg` is the standard driver and works with Supabase
-  identically. `DATABASE_POOL_MAX` exists for constrained local servers.
+  identically. `DATABASE_POOL_MAX` and `DATABASE_IDLE_TIMEOUT` can still pin the pool for a
+  constrained server, but nothing here needs them any more.
 - **Drizzle interpolates a JS array as a record**, so a raw `sql` template with
   `<> all(...)` over an array fails with "cannot cast type record to uuid[]". Use the query
   builder's `notInArray(column, values)` instead.
@@ -119,25 +120,29 @@ wrapper over it.
 ## Running it locally
 
 `npm run db:dev` starts a Postgres for development — PGlite behind a real wire-protocol
-socket, migrated and seeded — so the app can run before a Supabase project exists. It
-serves **one connection at a time**, so `.env.local` must pin the pool:
+socket, migrated and seeded — so the app can run before a Supabase project exists.
 
 ```
 DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres
-DATABASE_POOL_MAX=1
-DATABASE_IDLE_TIMEOUT=0
 ```
 
-Without those the pool opens a second connection, or retires and reopens an idle one, and
-the socket server resets it. Auth still needs a real Supabase project — the local database
-covers the data, not the sign-in.
+That is all it needs. Auth still wants a real Supabase project — the local database covers
+the data, not the sign-in.
 
-`npm run db:dev:demo` seeds a fuller book of work as well: 15 quotes across every status,
-dated relative to today. `npm run db:demo` does the same against a real database.
+`npm run db:dev:demo` seeds a fuller book of work as well: 18 quotes across every status,
+dated relative to today, including one returning client. `npm run db:demo` does the same
+against a real database.
 
-**One connection means one client.** Anything else that wants the local database — a build,
-`db:seed`, `db:demo` — fails with ECONNRESET while `npm run dev` is running. Stop the dev
-server first, or expect the odd transient build failure. Supabase has no such limit.
+**It used to serve one connection at a time**, which forced `DATABASE_POOL_MAX=1` and
+`DATABASE_IDLE_TIMEOUT=0` into `.env.local`, meant nothing else could touch the database
+while `npm run dev` was running, and left the socket server wedged after any abrupt
+disconnect — every later connection failing with ECONNRESET until it was restarted. Pages
+would 500 at random, because the very first query of every request is the auth check.
+
+None of that was PGlite. `PGLiteSocketServer` defaults `maxConnections` to **1** and
+`scripts/dev-db.ts` never set it; it now asks for 20. The server queues queries onto PGlite
+itself, so the one thing that genuinely has to be serial still is. If you see the old
+symptoms, check that option before anything else.
 
 ## Testing
 

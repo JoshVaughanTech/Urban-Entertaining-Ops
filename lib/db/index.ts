@@ -31,6 +31,16 @@ function build() {
     allowExitOnIdle: false,
   }));
 
+  /* A pooled connection can die while idle — the local dev database drops it,
+     and a real network will too. Without a listener here that arrives as an
+     unhandled 'error' event on the Pool, which can take the process down;
+     with one, pg discards the dead client and the next request gets a fresh
+     one. It does not rescue the request that was in flight when it happened:
+     that still surfaces as ECONNRESET. */
+  pool.on("error", (err) => {
+    console.error("[db] idle connection died, discarding it:", err.message);
+  });
+
   return drizzle(pool, { schema, casing: "snake_case" });
 }
 

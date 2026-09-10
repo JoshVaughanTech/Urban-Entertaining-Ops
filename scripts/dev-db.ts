@@ -6,14 +6,15 @@
  *
  *   npm run db:dev
  *
- * It serves ONE connection at a time, so .env.local must pin the pool:
+ * It used to serve one connection at a time, which meant the pool had to be
+ * pinned to a single connection, nothing else could touch the database while
+ * the dev server ran, and any abrupt disconnect left the socket server wedged
+ * until it was restarted.
  *
- *   DATABASE_URL=postgres://postgres@127.0.0.1:5433/postgres
- *   DATABASE_POOL_MAX=1
- *   DATABASE_IDLE_TIMEOUT=0
- *
- * Without those the pool opens a second connection, or retires and reopens
- * an idle one, and the socket server resets it.
+ * That was never a limit of PGlite. PGLiteSocketServer defaults maxConnections
+ * to 1, and we never set it. It queues queries internally, so PGlite still
+ * executes one at a time — the part that genuinely has to be serial — while
+ * the connections above it come and go freely.
  */
 
 import { PGlite } from "@electric-sql/pglite";
@@ -26,6 +27,7 @@ import { seedDatabase } from "@/lib/seed/run";
 
 const PORT = Number(process.env.UE_DEV_DB_PORT ?? 5433);
 const DATA_DIR = ".pglite";
+const MAX_CONNECTIONS = Number(process.env.UE_DEV_DB_MAX_CONNECTIONS ?? 20);
 
 async function main() {
   const client = await PGlite.create(DATA_DIR);
@@ -48,12 +50,18 @@ async function main() {
     }
   }
 
-  const server = new PGLiteSocketServer({ db: client, port: PORT, host: "127.0.0.1" });
+  const server = new PGLiteSocketServer({
+    db: client,
+    port: PORT,
+    host: "127.0.0.1",
+    /* Room for the app’s pool and a script or a migration beside it. */
+    maxConnections: MAX_CONNECTIONS,
+  });
   await server.start();
 
   console.log(
     `\nDev database listening on 127.0.0.1:${PORT}.\n` +
-      `Data persists in ${DATA_DIR}/. Ctrl+C to stop.\n`,
+      `Up to ${MAX_CONNECTIONS} connections. Data persists in ${DATA_DIR}/. Ctrl+C to stop.\n`,
   );
 
   const stop = async () => {
