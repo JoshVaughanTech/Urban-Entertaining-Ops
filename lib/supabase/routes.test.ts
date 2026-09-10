@@ -5,7 +5,7 @@
  * matching to a bare startsWith. */
 
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LANDING, isPublicPath, safeLanding } from "./routes";
+import { DEFAULT_LANDING, isPublicPath, safeLanding, DEFAULT_LANDING, LANDING_COOKIE, LANDING_COOKIE_MAX_AGE, clearedLandingCookie, landingCookie, readLandingCookie } from "./routes";
 
 describe("public paths", () => {
   it("lets the client reach a quote by its token", () => {
@@ -88,5 +88,70 @@ describe("landing after sign-in", () => {
     ]) {
       expect(safeLanding(hostile), `${hostile} must not be honoured`).toBe(DEFAULT_LANDING);
     }
+  });
+});
+
+/* The landing path used to ride in the redirect URL as ?next=. Supabase matches
+   its allowlist against the whole URL, so an exact entry never matched, it fell
+   back to the project Site URL without saying so, and staff were sent to a
+   different application. It travels in a cookie now. */
+describe("the landing cookie", () => {
+  it("carries the path, and is scoped to the whole site", () => {
+    const c = landingCookie("/app/clients", true);
+    expect(c).toContain(`${LANDING_COOKIE}=${encodeURIComponent("/app/clients")}`);
+    expect(c).toContain("Path=/");
+  });
+
+  it("survives the top-level navigation a mail client makes", () => {
+    // Strict would drop it on the way in from an email; Lax allows a GET.
+    expect(landingCookie("/app", true)).toContain("SameSite=Lax");
+  });
+
+  it("is short-lived", () => {
+    expect(landingCookie("/app", true)).toContain(`Max-Age=${LANDING_COOKIE_MAX_AGE}`);
+    expect(LANDING_COOKIE_MAX_AGE).toBeLessThanOrEqual(900);
+  });
+
+  it("is Secure over https and not over plain http, which is how dev runs", () => {
+    expect(landingCookie("/app", true)).toContain("Secure");
+    expect(landingCookie("/app", false)).not.toContain("Secure");
+  });
+
+  it("refuses to carry somewhere off this app", () => {
+    // The same open-redirect guard as the query string had.
+    expect(landingCookie("https://evil.example/x", true)).toContain(
+      encodeURIComponent(DEFAULT_LANDING),
+    );
+    expect(landingCookie("//evil.example", true)).toContain(encodeURIComponent(DEFAULT_LANDING));
+  });
+
+  it("clears with Max-Age=0", () => {
+    expect(clearedLandingCookie(true)).toContain("Max-Age=0");
+    expect(clearedLandingCookie(true)).not.toContain(`Max-Age=${LANDING_COOKIE_MAX_AGE}`);
+  });
+});
+
+describe("readLandingCookie", () => {
+  it("finds it among others", () => {
+    const jar = `sb-access-token=abc; ${LANDING_COOKIE}=${encodeURIComponent("/app/ordering")}; other=1`;
+    expect(readLandingCookie(jar)).toBe("/app/ordering");
+  });
+
+  it("is null when absent or empty", () => {
+    expect(readLandingCookie("")).toBeNull();
+    expect(readLandingCookie("a=1; b=2")).toBeNull();
+  });
+
+  it("does not match a cookie whose name merely ends with it", () => {
+    expect(readLandingCookie(`not_${LANDING_COOKIE}=/app/evil`)).toBeNull();
+  });
+
+  it("survives a malformed value rather than throwing", () => {
+    expect(readLandingCookie(`${LANDING_COOKIE}=%E0%A4%A`)).toBeNull();
+  });
+
+  it("round-trips what landingCookie wrote", () => {
+    const written = landingCookie("/app/quotes/new", true).split(";")[0]!;
+    expect(readLandingCookie(written)).toBe("/app/quotes/new");
   });
 });

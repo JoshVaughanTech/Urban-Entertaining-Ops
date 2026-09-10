@@ -29,3 +29,58 @@ export function safeLanding(next: string | null | undefined): string {
   if (!next.startsWith("/") || next.startsWith("//")) return DEFAULT_LANDING;
   return next;
 }
+
+/* Where the landing path travels while the sign-in link is in someone's inbox.
+ *
+ * It used to ride in the redirect URL itself — `/auth/callback?next=%2Fapp` —
+ * which meant Supabase's redirect allowlist had to match a URL carrying a query
+ * string. An exact entry does not, so the redirect was refused and Supabase
+ * fell back to the project's Site URL without saying so. That sent staff to a
+ * different application entirely, and the only fix was a `/**` wildcard in the
+ * allowlist, which is looser than it needs to be.
+ *
+ * Carrying it in a cookie instead lets the allowlist hold one exact URL.
+ *
+ * Ten minutes is plenty: the cookie is written the moment the link is
+ * requested, and read when it is opened. A longer life would only mean a stale
+ * landing path from an abandoned attempt. SameSite=Lax survives the top-level
+ * GET navigation from a mail client, which is exactly the trip it has to make. */
+export const LANDING_COOKIE = "ue_next";
+export const LANDING_COOKIE_MAX_AGE = 600;
+
+/** The Set-Cookie value written in the browser before the link is requested. */
+export function landingCookie(next: string, secure: boolean): string {
+  const parts = [
+    `${LANDING_COOKIE}=${encodeURIComponent(safeLanding(next))}`,
+    "Path=/",
+    `Max-Age=${LANDING_COOKIE_MAX_AGE}`,
+    "SameSite=Lax",
+  ];
+  // Secure is invalid on plain http, which is how local development runs.
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+/** Clears it once the callback has used it. */
+export const clearedLandingCookie = (secure: boolean) =>
+  landingCookie(DEFAULT_LANDING, secure).replace(
+    `Max-Age=${LANDING_COOKIE_MAX_AGE}`,
+    "Max-Age=0",
+  );
+
+/** Reads the landing path out of a document.cookie string. Pure, so the
+ *  parsing is testable rather than inlined in a component. */
+export function readLandingCookie(cookieString: string): string | null {
+  for (const part of cookieString.split(";")) {
+    const [name, ...rest] = part.trim().split("=");
+    if (name === LANDING_COOKIE) {
+      try {
+        return decodeURIComponent(rest.join("="));
+      } catch {
+        // A malformed value is no value; safeLanding would reject it anyway.
+        return null;
+      }
+    }
+  }
+  return null;
+}

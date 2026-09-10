@@ -86,6 +86,12 @@ wrapper over it.
   link was never clicked. `components/auth/HashSession.tsx` catches it in the browser, on
   `/login`, which is where it ends up because fragments survive redirects. The route
   handles the other two shapes.
+- **Supabase matches its redirect allowlist against the whole URL, query string included.**
+  This bit in production: the callback was requested as `/auth/callback?next=%2Fapp`, the
+  allowlist held the bare path, nothing matched, and Supabase fell back to the project Site
+  URL — which pointed at an unrelated app — without a word. The landing path travels in a
+  short-lived cookie now (`LANDING_COOKIE`), so the allowlist can hold one exact URL and
+  needs no wildcard. Do not put anything back in that query string.
 - **Supabase ignores `emailRedirectTo` unless that exact URL is in the redirect allowlist**,
   and falls back to the Site URL without saying so — the code then lands on `/`, where
   nothing reads it. Middleware forwards `?code=`/`?token_hash=` from `/` and `/login` to the

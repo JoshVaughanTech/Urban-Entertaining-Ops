@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { safeLanding } from "@/lib/supabase/routes";
+import { safeLanding, readLandingCookie } from "@/lib/supabase/routes";
 
 /* Completes a sign-in whose tokens arrived in the URL fragment.
  *
@@ -85,7 +85,13 @@ export function HashSession({ children }: { children: React.ReactNode }) {
            written, and nothing but a fresh request will carry it to the
            server. replace() rather than assign() so the tokens do not stay
            in history behind a back button. */
-        const next = safeLanding(new URLSearchParams(window.location.search).get("next"));
+        /* The query string still wins because middleware sets it when it
+           bounces someone here; the cookie is the fallback, written when the
+           link was requested. */
+        const next = safeLanding(
+          new URLSearchParams(window.location.search).get("next") ??
+            readLandingCookie(document.cookie),
+        );
         window.location.replace(next);
       } catch (err) {
         fail(err instanceof Error ? err.message : String(err));

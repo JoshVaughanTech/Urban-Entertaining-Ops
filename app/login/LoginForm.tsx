@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { landingCookie } from "@/lib/supabase/routes";
 import { buttonClass } from "@/components/ui";
 import styles from "./login.module.css";
 
@@ -18,9 +19,18 @@ export function LoginForm({ next }: { next: string }) {
     try {
       const supabase = createClient();
       const origin = window.location.origin;
+
+      /* Where to land afterwards travels in a cookie, not in the redirect URL.
+         Supabase matches its allowlist against the whole URL including any
+         query string, so sending ?next= there forced a wildcard entry — and
+         when it did not match, Supabase silently fell back to the project Site
+         URL and sent people to a different app. The URL below is now exactly
+         what the allowlist holds. */
+      document.cookie = landingCookie(next, origin.startsWith("https:"));
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}` },
+        options: { emailRedirectTo: `${origin}/auth/callback` },
       });
       if (error) throw error;
       setState("sent");
