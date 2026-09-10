@@ -100,6 +100,13 @@ wrapper over it.
   fonts and the mark off disk. Next cannot trace a path built with `path.join`, so
   `next.config.ts` declares them; without it the build is green and the deployed route
   throws ENOENT.
+- **Never run `npm run build` while `npm run dev` is running.** Both own `.next`.
+  The build rewrites it, deleting the chunks the dev server is still handing out,
+  and from then on every stylesheet 404s: pages keep returning 200 and render
+  completely unstyled, with nothing in either log to say why. It looks like the
+  CSS broke. Stop the dev server first, and if it has already happened,
+  `rm -rf .next` and restart — restarting alone is not always enough, because
+  the mixed dev and production output stays on disk.
 - **A multi-line search-and-replace against a repo file silently does nothing.**
   Files git checked out are CRLF; files written here are LF, so a scripted edit
   whose search string spans lines never matches — and `String.replace` returns
