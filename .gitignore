@@ -2,9 +2,6 @@ node_modules/
 .next/
 out/
 build/
-.env
-.env.local
-.env*.local
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
@@ -13,3 +10,9 @@ coverage/
 
 .pglite/
 devdb.log
+
+# Every env file stays local. The example is committed on purpose — it is a
+# template with no real values in it — so it is re-allowed below.
+.env
+.env.*
+!.env.local.example
