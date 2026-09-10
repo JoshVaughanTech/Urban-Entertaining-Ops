@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { Field, Input, form } from "@/components/ui/form";
 import { getClientBrief, searchClients } from "@/lib/actions/clients";
-import type { ClientBrief, ClientSummary } from "@/lib/clients/types";
+import type { ClientBrief, ClientMatch } from "@/lib/clients/types";
 import styles from "./client.module.css";
 
 /* The client field, which used to be a plain text box.
@@ -28,9 +28,10 @@ export function ClientPicker({
   /** A suggestion was chosen, and their record has loaded. */
   onPick: (brief: ClientBrief) => void;
 }) {
-  const [suggestions, setSuggestions] = useState<ClientSummary[]>([]);
+  const [suggestions, setSuggestions] = useState<ClientMatch[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const listId = useId();
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -40,6 +41,10 @@ export function ClientPicker({
   useEffect(() => {
     if (clientId || clientName.trim().length < 2) {
       setSuggestions([]);
+      // Also clear this: backspacing from "Har" to "H" takes the early return,
+      // and the previous run’s cleanup has already set its own live to false,
+      // so nothing else would ever turn "Looking…" off again.
+      setLoading(false);
       return;
     }
 
@@ -49,6 +54,11 @@ export function ClientPicker({
       try {
         const found = await searchClients(clientName);
         if (live) setSuggestions(found);
+      } catch {
+        /* An expired session or a dropped connection. Show nothing rather than
+           an unhandled rejection: staff can still type the name, and it becomes
+           a new client on save. */
+        if (live) setSuggestions([]);
       } finally {
         if (live) setLoading(false);
       }
@@ -70,10 +80,18 @@ export function ClientPicker({
     return () => document.removeEventListener("mousedown", away);
   }, [open]);
 
-  async function choose(summary: ClientSummary) {
+  async function choose(summary: ClientMatch) {
     setOpen(false);
-    const brief = await getClientBrief(summary.id);
-    if (brief) onPick(brief);
+    try {
+      const brief = await getClientBrief(summary.id);
+      if (brief) onPick(brief);
+      else setFailed(true);
+    } catch {
+      /* Without this the click silently does nothing, the client never
+         attaches, and the quote is later filed under a second client created
+         from the same name. Say so instead. */
+      setFailed(true);
+    }
   }
 
   const showing = open && !clientId && suggestions.length > 0;
@@ -97,6 +115,7 @@ export function ClientPicker({
           aria-expanded={showing}
           aria-controls={listId}
           onChange={(e) => {
+            setFailed(false);
             onType(e.target.value);
             setOpen(true);
           }}
@@ -130,6 +149,12 @@ export function ClientPicker({
       ) : null}
 
       {loading && !clientId ? <p className={form.hint}>Looking…</p> : null}
+      {failed ? (
+        <p className={form.error}>
+          Could not load that client. Check your connection, or keep the name typed and it will
+          be treated as a new client.
+        </p>
+      ) : null}
     </div>
   );
 }

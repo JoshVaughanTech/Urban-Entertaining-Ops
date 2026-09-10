@@ -18,6 +18,7 @@ import type {
   ClientBrief,
   ClientContact,
   ClientHistoryEntry,
+  ClientMatch,
   ClientSummary,
   ClientWriteInput,
   ContactWriteInput,
@@ -101,6 +102,26 @@ export async function listClients(db: Db): Promise<ClientSummary[]> {
   }));
 }
 
+/** Names for the typeahead. Deliberately not listClients: that one joins
+ *  quotes, digs the total out of each snapshot and joins contacts, none of
+ *  which a suggestion shows, and it would run on every keystroke. */
+export async function listClientsForSearch(db: Db): Promise<ClientMatch[]> {
+  const { rows } = await db.execute(sql`
+    select c.id, c.name, c.discount_pct, count(e.id)::int as event_count
+    from clients c
+    left join events e on e.client_id = c.id
+    group by c.id, c.name, c.discount_pct
+    order by max(e.event_date) desc nulls last, lower(c.name)
+  `);
+
+  return (rows as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    name: String(r.name),
+    discountPct: Number(r.discount_pct),
+    eventCount: Number(r.event_count),
+  }));
+}
+
 export async function loadClient(db: Db, id: string): Promise<Client | null> {
   const [row] = await db.select().from(s.clients).where(eq(s.clients.id, id)).limit(1);
   if (!row) return null;
@@ -149,6 +170,16 @@ export async function loadClientHistory(db: Db, clientId: string): Promise<Clien
     packageName: r.packageName ?? null,
     total: (r.snapshot?.totals?.total as number | undefined) ?? null,
   }));
+}
+
+/** Events referencing this client. This, not the quote count, is what stands
+ *  in the way of deleting them: one event quoted three times is one blocker,
+ *  and an event with no quote blocks while showing nothing in history. */
+export async function countClientEvents(db: Db, clientId: string): Promise<number> {
+  const { rows } = await db.execute(
+    sql`select count(*)::int as n from events where client_id = ${clientId}`,
+  );
+  return Number((rows[0] as { n: number }).n);
 }
 
 /** What the quote builder needs on selecting a returning client. */
@@ -262,26 +293,39 @@ export async function findOrCreateClient(db: Db, rawName: string): Promise<Clien
     if (loaded) return loaded;
   }
 
-  try {
-    return await createClient(db, {
-      name,
-      discountPct: 0,
-      preferences: null,
-      staffNotes: null,
-    });
-  } catch (error) {
-    // Lost a race with a concurrent save; read back whichever won.
-    const [raced] = await db
-      .select()
-      .from(s.clients)
-      .where(sql`lower(${s.clients.name}) = lower(${name})`)
-      .limit(1);
-    if (raced) {
-      const loaded = await loadClient(db, raced.id);
-      if (loaded) return loaded;
-    }
-    throw error;
+  /* Insert without letting it fail.
+   *
+   * This runs inside createQuote’s transaction, and in Postgres a failed
+   * statement aborts the whole block — every later command is refused until it
+   * ends. So "insert, catch, select" cannot recover here: the recovery SELECT
+   * is itself refused, and the caller sees "current transaction is aborted"
+   * instead of their quote being saved.
+   *
+   * Conflicts are not rare enough to treat as exceptional, either. Any name
+   * that normalises to nothing — "---", "!!!" — is invisible to sameClient, so
+   * the insert is attempted every time and collides from the second one on. */
+  const [created] = await db
+    .insert(s.clients)
+    .values({ name, discountPct: 0, preferences: null, staffNotes: null })
+    .onConflictDoNothing()
+    .returning();
+
+  if (created) return { ...created, contacts: [] } as Client;
+
+  /* Someone already holds that name: a concurrent save, or a name sameClient
+     cannot match. Read back whichever row is there. */
+  const [existing] = await db
+    .select()
+    .from(s.clients)
+    .where(sql`lower(${s.clients.name}) = lower(${name})`)
+    .limit(1);
+
+  if (existing) {
+    const loaded = await loadClient(db, existing.id);
+    if (loaded) return loaded;
   }
+
+  throw new ClientError(`Could not attach the quote to a client called ${name}.`);
 }
 
 /* ── contacts ──────────────────────────────────────────────────────────── */

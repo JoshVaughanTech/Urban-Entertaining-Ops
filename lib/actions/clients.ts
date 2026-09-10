@@ -1,16 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { matchClients } from "@/lib/clients/match";
-import type { ClientBrief, ClientSummary, ContactRole } from "@/lib/clients/types";
+import type { ClientBrief, ClientMatch, ContactRole } from "@/lib/clients/types";
 import { requireUser, denyReadOnly } from "@/lib/auth";
 import {
   ClientError,
   addContact,
   createClient,
   deleteClient,
-  listClients,
+  listClientsForSearch,
   loadClientBrief,
   removeContact,
   updateClient,
@@ -55,12 +56,12 @@ const contactInput = (data: FormData) => ({
 
 /** Backs the typeahead in the quote builder. Ranking is pure and shared with
  *  the client, so the list filters as someone types without a round trip. */
-export async function searchClients(query: string): Promise<ClientSummary[]> {
+export async function searchClients(query: string): Promise<ClientMatch[]> {
   await requireUser();
   if (!query.trim()) return [];
-  // listClients is already ordered by most recent activity, which matchClients
-  // preserves among equal scores.
-  return matchClients(await listClients(db), query);
+  // Already ordered by most recent activity, which matchClients preserves
+  // among equal scores.
+  return matchClients(await listClientsForSearch(db), query);
 }
 
 /** Everything the builder shows once a returning client is picked. */
@@ -83,16 +84,24 @@ export async function saveClient(_prev: ActionState, data: FormData): Promise<Ac
     staffNotes: nullable(data, "staffNotes"),
   };
 
+  let createdId: string | null = null;
   try {
     if (id) await updateClient(db, id, input);
-    else await createClient(db, input);
+    else createdId = (await createClient(db, input)).id;
   } catch (err) {
     return failed(message(err));
   }
 
   revalidatePath("/app/clients");
-  if (id) revalidatePath(`/app/clients/${id}`);
-  return succeeded(id ? "Saved." : "Client added.");
+  revalidatePath(`/app/clients/${id || createdId}`);
+
+  /* A new client leaves the form holding no id, so pressing save again would
+     try to create them a second time and be refused as a duplicate. Send them
+     to the record instead, which is where contacts and history live anyway.
+     redirect() throws, so it must sit outside the try. */
+  if (createdId) redirect(`/app/clients/${createdId}`);
+
+  return succeeded("Saved.");
 }
 
 export async function removeClient(_prev: ActionState, data: FormData): Promise<ActionState> {

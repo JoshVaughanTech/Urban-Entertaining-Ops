@@ -24,8 +24,10 @@ import {
   addContact,
   createClient,
   deleteClient,
+  countClientEvents,
   findOrCreateClient,
   listClients,
+  listClientsForSearch,
   loadClient,
   loadClientHistory,
   primaryEmail,
@@ -382,5 +384,81 @@ describe("the clients list", () => {
     const row = (await listClients(db)).find((x) => x.id === c.id)!;
     expect(row.primaryContactName).toBe("Ada Lovelace");
     expect(row.primaryContactEmail).toBe("ada@listed.example");
+  });
+});
+
+/* findOrCreateClient runs inside createQuote's transaction. A failed INSERT
+   aborts that transaction, so recovering with a SELECT afterwards cannot work —
+   Postgres refuses every further command until the block ends.
+
+   The trigger is not exotic. A name that normalises to nothing ("---", "!!!")
+   can never be matched by sameClient, so the insert is always attempted, and
+   the second such quote hits the unique index. */
+describe("findOrCreateClient inside a transaction", () => {
+  it("survives a name that normalises to nothing, twice", async () => {
+    await db.transaction(async (tx: typeof db) => {
+      await findOrCreateClient(tx, "---");
+    });
+
+    // The second one cannot match by name, so it attempts the insert again.
+    const again = await db.transaction(async (tx: typeof db) => findOrCreateClient(tx, "---"));
+    expect(again.name).toBe("---");
+  });
+
+  it("returns the winner when it loses a race, without aborting the caller", async () => {
+    await createClient(db, { ...blank, name: "Raced Co" });
+
+    const found = await db.transaction(async (tx: typeof db) => {
+      // Simulates the loser of a race: the row is already there.
+      return findOrCreateClient(tx, "Raced Co");
+    });
+    expect(found.name).toBe("Raced Co");
+
+    // The transaction must still be usable afterwards.
+    const after = await db.transaction(async (tx: typeof db) => {
+      await findOrCreateClient(tx, "Raced Co");
+      return findOrCreateClient(tx, "Another After Race");
+    });
+    expect(after.name).toBe("Another After Race");
+  });
+});
+
+describe("the typeahead's own query", () => {
+  it("counts events without needing quotes, snapshots or contacts", async () => {
+    const c = await createClient(db, { ...blank, name: "Light Query Co", discountPct: 7 });
+    await quoteFor(c.id, "Light Query Co");
+    await quoteFor(c.id, "Light Query Co", {
+      event: { ...quoteInput("x").event, clientName: "Light Query Co", eventDate: "2026-06-06" },
+    });
+
+    const row = (await listClientsForSearch(db)).find((x) => x.id === c.id)!;
+    expect(row).toEqual({
+      id: c.id,
+      name: "Light Query Co",
+      discountPct: 7,
+      eventCount: 2,
+    });
+  });
+
+  it("includes a client who has never booked", async () => {
+    const c = await createClient(db, { ...blank, name: "Unbooked Search Co" });
+    const row = (await listClientsForSearch(db)).find((x) => x.id === c.id)!;
+    expect(row.eventCount).toBe(0);
+  });
+});
+
+describe("countClientEvents", () => {
+  it("counts events, not quotes", async () => {
+    const c = await createClient(db, { ...blank, name: "Count Events Co" });
+    expect(await countClientEvents(db, c.id)).toBe(0);
+
+    await quoteFor(c.id, "Count Events Co");
+    expect(await countClientEvents(db, c.id)).toBe(1);
+
+    // A second quote on its own event is a second event.
+    await quoteFor(c.id, "Count Events Co", {
+      event: { ...quoteInput("x").event, clientName: "Count Events Co", eventDate: "2026-07-07" },
+    });
+    expect(await countClientEvents(db, c.id)).toBe(2);
   });
 });

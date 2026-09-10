@@ -72,6 +72,16 @@ export type ClientSummary = {
   lifetimeValue: Cents;
 };
 
+/** A typeahead suggestion. Everything the picker shows and nothing else — the
+ *  full ClientSummary costs a jsonb extraction and two more joins, and this
+ *  runs on every keystroke. */
+export type ClientMatch = {
+  id: string;
+  name: string;
+  discountPct: number;
+  eventCount: number;
+};
+
 export type ClientWriteInput = {
   name: string;
   discountPct: number;

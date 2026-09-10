@@ -13,7 +13,7 @@ import {
 import { Card, EmptyState, PageHeader, Tag } from "@/components/ui";
 import { Table, ui } from "@/components/ui/table";
 import { CONTACT_ROLE_LABELS } from "@/lib/clients/types";
-import { loadClient, loadClientHistory } from "@/lib/data/clients";
+import { countClientEvents, loadClient, loadClientHistory } from "@/lib/data/clients";
 import { loadWorkspace } from "@/lib/data/load";
 import { db } from "@/lib/db";
 import { money, shortDate } from "@/lib/engine/format";
@@ -29,6 +29,12 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const isNew = id === "new";
 
+  /* Anything that is not a uuid would reach Postgres and come back as
+     "invalid input syntax for type uuid" — a 500 where a 404 is meant.
+     /app/clients/foo is a typo, not a server fault. */
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!isNew && !UUID.test(id)) notFound();
+
   const state = await loadWorkspace();
   if (!state.ok) {
     return (
@@ -43,6 +49,11 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   if (!isNew && !client) notFound();
 
   const history = client ? await loadClientHistory(db, client.id) : [];
+
+  /* What actually blocks deletion is events referencing the client, not
+     quotes. One event quoted three times is one thing standing in the way,
+     and an event with no quote is invisible to history but still blocks. */
+  const eventCount = client ? await countClientEvents(db, client.id) : 0;
 
   return (
     <>
@@ -64,7 +75,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
           {client ? (
             <Card title="Danger zone" className="dangerZone">
               <CanWrite>
-                <DeleteClientButton id={client.id} eventCount={history.length} />
+                <DeleteClientButton id={client.id} eventCount={eventCount} />
               </CanWrite>
             </Card>
           ) : null}
