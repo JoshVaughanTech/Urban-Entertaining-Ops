@@ -54,7 +54,7 @@ export default async function OrderingPage({
   const backwards = from > to;
   const view = backwards
     ? { quotes: [], lines: [], groups: [], warnings: [], totalCost: 0 }
-    : await buildOrdering(db, from, to);
+    : await buildOrdering(db, from, to, state.cat);
   const order = backwards ? { id: null, status: "draft" as const, ordered: {} } : await loadOrderState(db, from, to);
 
   const missingEmail = view.groups

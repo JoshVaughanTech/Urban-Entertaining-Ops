@@ -20,6 +20,7 @@ import {
   type RollupLine,
   type SupplierGroup,
 } from "@/lib/engine/ordering";
+import type { Catalogue } from "@/lib/engine/types";
 import { loadCatalogue } from "./catalogue";
 import { loadConfirmedInWindow } from "./quotes";
 
@@ -181,8 +182,20 @@ export type OrderingView = {
 
 /** Everything the ordering screen and the purchase-order emails need, built
  *  the same way for both so an email can never disagree with the screen. */
-export async function buildOrdering(db: Db, from: string, to: string): Promise<OrderingView> {
-  const cat = await loadCatalogue(db);
+export async function buildOrdering(
+  db: Db,
+  from: string,
+  to: string,
+  /** The catalogue, when the caller already holds it. The ordering screen has
+   *  loaded it for loadWorkspace() by the time it gets here, and loading it a
+   *  second time doubled that page's queries for nothing.
+   *
+   *  Passing it in does not make the rollup stale: it is the same catalogue,
+   *  read in the same request. Ordering still costs from live ingredient
+   *  prices, which is the whole point of it not using a snapshot. */
+  catalogue?: Catalogue,
+): Promise<OrderingView> {
+  const cat = catalogue ?? (await loadCatalogue(db));
   const quotes = await loadConfirmedInWindow(db, from, to);
   const { lines, warnings } = ingredientRollup(quotes, cat);
 
