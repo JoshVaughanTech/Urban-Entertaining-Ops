@@ -23,6 +23,11 @@ rather than left to be re-derived.
 Rejected, and easy to add later on top of this: per-package agreed rates, a named staff
 roster, client-level dietary defaults, client payment terms.
 
+Also rejected, 10 September 2026, after the backfill showed every demo client name
+carrying its occasion: **events get no occasion field.** The client field is the client;
+the occasion goes in the event notes. Running them together would open a new client per
+event and the history would never build.
+
 ## Data model
 
 ```

@@ -271,6 +271,14 @@ Name matching (`lib/clients/match.ts`) is for **searching only**. Uniqueness is
 legitimate rows. `findOrCreateClient` is stricter than search — exact once normalised —
 so "Harper" never silently attaches to "Harper & Co."
 
+**Events have no "occasion" field, and are not getting one** (client's decision,
+10 September 2026). `clientName` is the client and nothing else; the occasion, where it
+matters, goes in the event's `notes`. The mockup and the first demo book ran them together
+— "Alderman & Wyatt — partner dinner" — which was fine when there was nowhere else to put
+it, and became actively wrong once clients were real records: every event would open a new
+client and the history would never build. The demo book was corrected to match. Don't
+reintroduce it.
+
 Reasoning behind all of it: `docs/plans/2026-09-10-client-database-design.md`.
 
 ## Quote status

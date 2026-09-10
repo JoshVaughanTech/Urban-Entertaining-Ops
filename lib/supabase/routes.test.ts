@@ -5,7 +5,16 @@
  * matching to a bare startsWith. */
 
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LANDING, isPublicPath, safeLanding, DEFAULT_LANDING, LANDING_COOKIE, LANDING_COOKIE_MAX_AGE, clearedLandingCookie, landingCookie, readLandingCookie } from "./routes";
+import {
+  DEFAULT_LANDING,
+  LANDING_COOKIE,
+  LANDING_COOKIE_MAX_AGE,
+  clearedLandingCookie,
+  isPublicPath,
+  landingCookie,
+  readLandingCookie,
+  safeLanding,
+} from "./routes";
 
 describe("public paths", () => {
   it("lets the client reach a quote by its token", () => {

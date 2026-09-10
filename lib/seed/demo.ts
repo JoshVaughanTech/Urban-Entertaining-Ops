@@ -93,7 +93,7 @@ const DEMO: DemoQuote[] = [
 
   /* ── confirmed, upcoming: these drive the ordering screen ───────────── */
   {
-    clientName: "Alderman & Wyatt — partner dinner",
+    clientName: "Alderman & Wyatt",
     contactEmail: "events@aldermanwyatt.example",
     dayOffset: 6,
     guests: 48,
@@ -106,7 +106,7 @@ const DEMO: DemoQuote[] = [
     status: "confirmed",
   },
   {
-    clientName: "Marchetti wedding",
+    clientName: "Marchetti",
     contactEmail: "sofia.marchetti@example.com",
     dayOffset: 9,
     guests: 130,
@@ -121,7 +121,7 @@ const DEMO: DemoQuote[] = [
     status: "confirmed",
   },
   {
-    clientName: "Northcote Studios — launch",
+    clientName: "Northcote Studios",
     contactEmail: "hello@northcotestudios.example",
     dayOffset: 12,
     guests: 70,
@@ -134,7 +134,7 @@ const DEMO: DemoQuote[] = [
     status: "confirmed",
   },
   {
-    clientName: "Beaumont Legal — end of financial year",
+    clientName: "Beaumont Legal",
     contactEmail: "ops@beaumontlegal.example",
     dayOffset: 17,
     guests: 95,
@@ -151,7 +151,7 @@ const DEMO: DemoQuote[] = [
 
   /* ── sent, waiting on the client ────────────────────────────────────── */
   {
-    clientName: "Halstead & Rowe — client lunch",
+    clientName: "Halstead & Rowe",
     contactEmail: "reception@halsteadrowe.example",
     dayOffset: 21,
     guests: 24,
@@ -164,7 +164,7 @@ const DEMO: DemoQuote[] = [
     status: "sent",
   },
   {
-    clientName: "Fitzroy Print Co. — 20 years",
+    clientName: "Fitzroy Print Co.",
     contactEmail: "anna@fitzroyprint.example",
     dayOffset: 34,
     guests: 85,
@@ -177,7 +177,7 @@ const DEMO: DemoQuote[] = [
     status: "sent",
   },
   {
-    clientName: "Ferngrove Estate — spring open day",
+    clientName: "Ferngrove Estate",
     contactEmail: "cellar@ferngrove.example",
     dayOffset: 45,
     guests: 140,
@@ -193,7 +193,7 @@ const DEMO: DemoQuote[] = [
 
   /* ── drafts, still being written ────────────────────────────────────── */
   {
-    clientName: "Templeton 60th",
+    clientName: "Templeton",
     contactEmail: null,
     dayOffset: 52,
     guests: 60,
@@ -207,7 +207,7 @@ const DEMO: DemoQuote[] = [
     status: "draft",
   },
   {
-    clientName: "Carlton Chambers — welcome drinks",
+    clientName: "Carlton Chambers",
     contactEmail: "practice@carltonchambers.example",
     dayOffset: 28,
     guests: 40,
@@ -220,7 +220,7 @@ const DEMO: DemoQuote[] = [
     status: "draft",
   },
   {
-    clientName: "Whitlock Family — christening",
+    clientName: "Whitlock Family",
     contactEmail: null,
     dayOffset: 70,
     guests: 35,
@@ -235,7 +235,7 @@ const DEMO: DemoQuote[] = [
 
   /* ── didn't come off ────────────────────────────────────────────────── */
   {
-    clientName: "Brunswick Athletic — presentation night",
+    clientName: "Brunswick Athletic",
     contactEmail: "committee@brunswickathletic.example",
     dayOffset: 30,
     guests: 110,
@@ -250,7 +250,7 @@ const DEMO: DemoQuote[] = [
     status: "declined",
   },
   {
-    clientName: "Sable & Finch — store opening",
+    clientName: "Sable & Finch",
     contactEmail: "marketing@sablefinch.example",
     dayOffset: 26,
     guests: 55,
@@ -263,7 +263,7 @@ const DEMO: DemoQuote[] = [
     status: "declined",
   },
   {
-    clientName: "Ashgrove Partners — roadshow",
+    clientName: "Ashgrove Partners",
     contactEmail: "events@ashgrove.example",
     dayOffset: 19,
     guests: 65,
@@ -279,7 +279,7 @@ const DEMO: DemoQuote[] = [
 
   /* ── already happened, so the book has history ──────────────────────── */
   {
-    clientName: "Prentice & Hall — winter dinner",
+    clientName: "Prentice & Hall",
     contactEmail: "office@prenticehall.example",
     dayOffset: -12,
     guests: 52,
@@ -292,7 +292,7 @@ const DEMO: DemoQuote[] = [
     status: "confirmed",
   },
   {
-    clientName: "Rossmoyne Gallery — retrospective",
+    clientName: "Rossmoyne Gallery",
     contactEmail: "curator@rossmoyne.example",
     dayOffset: -26,
     guests: 90,
