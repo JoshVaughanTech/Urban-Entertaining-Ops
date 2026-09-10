@@ -125,6 +125,7 @@ export async function loadQuote(db: Db, id: string): Promise<QuoteDetail | null>
     confirmedAt: row.confirmedAt,
     snapshot: (row.snapshot as QuoteSnapshot | null) ?? null,
     event: {
+      clientId: event.clientId,
       clientName: event.clientName,
       contactEmail: event.contactEmail,
       eventDate: event.eventDate,

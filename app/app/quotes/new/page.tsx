@@ -31,6 +31,7 @@ export default async function NewQuotePage() {
           settings={state.settings}
           initial={{
             event: {
+              clientId: null,
               clientName: "",
               contactEmail: null,
               eventDate: addDays(todayISO(), 30),

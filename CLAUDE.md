@@ -100,6 +100,12 @@ wrapper over it.
   fonts and the mark off disk. Next cannot trace a path built with `path.join`, so
   `next.config.ts` declares them; without it the build is green and the deployed route
   throws ENOENT.
+- **A multi-line search-and-replace against a repo file silently does nothing.**
+  Files git checked out are CRLF; files written here are LF, so a scripted edit
+  whose search string spans lines never matches — and `String.replace` returns
+  the input unchanged rather than erroring. Single-line edits appear to work,
+  which makes it look like the edit landed. Normalise to LF first, and assert
+  each replacement actually matched.
 - **Screens under `/app` must not be prerendered** — they read session cookies and live
   data. The layout sets `dynamic = "force-dynamic"`.
 
@@ -132,7 +138,7 @@ server first, or expect the odd transient build failure. Supabase has no such li
 npm test
 ```
 
-Thirteen suites, all runnable with no credentials and no network:
+Sixteen suites, all runnable with no credentials and no network:
 
 - **Engine** — checked against golden values produced by running the approved mockup's own
   functions over its own data. If a number here changes, the app has stopped agreeing with
@@ -218,6 +224,35 @@ database by hand.
 
 Managed at `/app/team`. Rejected users land on `/no-access`, which is public by design and
 shows nothing.
+
+## Clients
+
+`clients` is who we have cooked for. `events.client_id` links a quote to one, and
+`events.client_name` **stays alongside it** — that is the freeze rule, not redundancy:
+rename a client next year and every quote they already hold keeps the name it was sent
+under. Same for `events.contact_email`. Do not tidy either into a join;
+`lib/data/client-freeze.test.ts` exists to fail if you do, and it has been checked by
+doing exactly that.
+
+**Nothing on a client may reach a client-facing document.** `preferences` and
+`staff_notes` are internal operational memory. The standing discount reaches the client
+only as cents already frozen on the quote.
+
+`discount_pct` is the one thing here that touches money, and only as a **pre-fill**: the
+builder derives `clientDiscount(subtotal, pct)` and it tracks the subtotal until staff
+type their own number, at which point it stops. Nothing records where the number came
+from, so a reopened draft treats the saved cents as staff's own — re-deriving them from a
+percentage that may have moved since would quietly reprice the draft.
+
+A percentage rather than an agreed per-head rate was deliberate: a rate would store a
+price in a second place and go stale against the catalogue without telling anyone.
+
+Name matching (`lib/clients/match.ts`) is for **searching only**. Uniqueness is
+`lower(name)` and nothing else, so two clients whose names normalise the same are both
+legitimate rows. `findOrCreateClient` is stricter than search — exact once normalised —
+so "Harper" never silently attaches to "Harper & Co."
+
+Reasoning behind all of it: `docs/plans/2026-09-10-client-database-design.md`.
 
 ## Quote status
 

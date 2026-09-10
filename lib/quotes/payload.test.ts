@@ -9,8 +9,11 @@ import { describe, expect, it } from "vitest";
 import { parseQuotePayload } from "./payload";
 import { QuoteError } from "./types";
 
+const CLIENT_ID = "3f2504e0-4f89-41d3-9a0c-0305e82c3301";
+
 const valid = {
   event: {
+    clientId: CLIENT_ID,
     clientName: "Harper & Co. Wedding",
     contactEmail: "harper@example.com",
     eventDate: "2026-11-14",
@@ -42,6 +45,7 @@ describe("a well-formed payload", () => {
   it("comes through intact", () => {
     expect(post(valid)).toEqual({
       event: {
+        clientId: CLIENT_ID,
         clientName: "Harper & Co. Wedding",
         contactEmail: "harper@example.com",
         eventDate: "2026-11-14",
@@ -206,6 +210,7 @@ describe("hostile input", () => {
   it("does not let a prototype key through", () => {
     const out = post({ ...valid, event: { ...valid.event, __proto__: { admin: true } } });
     expect(Object.keys(out.event).sort()).toEqual([
+      "clientId",
       "clientName",
       "contactEmail",
       "dietary",
@@ -238,5 +243,37 @@ describe("hostile input", () => {
       "packageId",
       "pricePerHead",
     ]);
+  });
+});
+
+/* clientId is a foreign key, so a bad one would surface to staff as a raw
+   Postgres error rather than a refusal. It is dropped, not trusted. */
+describe("the client id", () => {
+  const idFrom = (clientId: unknown) =>
+    post({ ...valid, event: { ...valid.event, clientId } }).event.clientId;
+
+  it("accepts a uuid, in either case", () => {
+    expect(idFrom("3f2504e0-4f89-41d3-9a0c-0305e82c3301")).toBe(
+      "3f2504e0-4f89-41d3-9a0c-0305e82c3301",
+    );
+    expect(idFrom("3F2504E0-4F89-41D3-9A0C-0305E82C3301")).toBe(
+      "3F2504E0-4F89-41D3-9A0C-0305E82C3301",
+    );
+  });
+
+  it("drops anything that is not a uuid rather than passing it to the database", () => {
+    for (const junk of ["", "   ", "not-a-uuid", "1; drop table clients", 42, {}, [], true]) {
+      expect(idFrom(junk)).toBeNull();
+    }
+  });
+
+  it("is null when the builder sends none, which is a new client", () => {
+    const { clientId: _drop, ...eventWithout } = valid.event;
+    expect(post({ ...valid, event: eventWithout }).event.clientId).toBeNull();
+  });
+
+  it("never overwrites the typed client name", () => {
+    // The name is what the quote freezes; the id only says whose history it joins.
+    expect(post(valid).event.clientName).toBe("Harper & Co. Wedding");
   });
 });

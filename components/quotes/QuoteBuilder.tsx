@@ -3,6 +3,8 @@
 import { useActionState, useMemo, useState } from "react";
 import { saveAndPreviewQuote, saveQuoteDraft } from "@/lib/actions/quotes";
 import { CanWrite } from "@/components/ReadOnly";
+import { ClientBriefPanel } from "@/components/quotes/ClientBrief";
+import { ClientPicker } from "@/components/quotes/ClientPicker";
 import { Card, EmptyState, Tag, buttonClass } from "@/components/ui";
 import { Stat, Stats, Table, ui } from "@/components/ui/table";
 import { Field, FormError, Input, Row, Select, Textarea, form } from "@/components/ui/form";
@@ -11,6 +13,7 @@ import { money, moneyDeduction, percent } from "@/lib/engine/format";
 import { rankPackages } from "@/lib/engine/fit";
 import {
   buildQuoteLines,
+  clientDiscount,
   isMarginHealthy,
   quoteTotals,
   tierPrice,
@@ -24,6 +27,7 @@ import {
   type Settings,
   type Style,
 } from "@/lib/engine/types";
+import type { ClientBrief } from "@/lib/clients/types";
 import type { CustomLineInput, QuoteEventInput } from "@/lib/quotes/types";
 import { idle } from "@/lib/validate";
 
@@ -53,6 +57,13 @@ export function QuoteBuilder({
   const cat = useMemo(() => buildCatalogue(catalogue), [catalogue]);
 
   const [draft, setDraft] = useState<Draft>(initial);
+
+  /* The client whose record is on screen, and whether the discount is still
+     following their standing rate. A reopened draft starts "manual": the cents
+     that were saved are staff's own number, and re-deriving them from a
+     percentage that may have changed since would quietly reprice the draft. */
+  const [brief, setBrief] = useState<ClientBrief | null>(null);
+  const [discountFollowsClient, setDiscountFollowsClient] = useState(false);
   const [saveState, save] = useActionState(saveQuoteDraft, idle);
   const [previewState, preview] = useActionState(saveAndPreviewQuote, idle);
 
@@ -100,9 +111,46 @@ export function QuoteBuilder({
       })
     : [];
 
+  /* Derived, not stored, so it tracks the subtotal while it is following the
+     client: change the guest count and it recomputes. The moment staff type
+     their own number it stops following and stays put. */
+  const subtotal = lines.reduce((sum, l) => sum + l.qty * l.unitPrice, 0);
+  const clientPct = brief?.client.discountPct ?? 0;
+  const discount =
+    discountFollowsClient && clientPct > 0 ? clientDiscount(subtotal, clientPct) : draft.discount;
+
+  function pickClient(picked: ClientBrief) {
+    setBrief(picked);
+    setDiscountFollowsClient(picked.client.discountPct > 0);
+    setDraft((d) => ({
+      ...d,
+      event: {
+        ...d.event,
+        clientId: picked.client.id,
+        clientName: picked.client.name,
+        // Only fill an empty box: an address typed for this event wins.
+        contactEmail:
+          d.event.contactEmail ?? picked.client.contacts.find((c) => c.isPrimary)?.email ?? null,
+      },
+    }));
+  }
+
+  /* Typing detaches the client — the name no longer means them. Whatever
+     discount is on screen is kept as a plain number rather than snapping back
+     to zero, which would be a silent price change nobody asked for. */
+  function typeClientName(name: string) {
+    setBrief(null);
+    setDiscountFollowsClient(false);
+    setDraft((d) => ({
+      ...d,
+      discount: discountFollowsClient ? discount : d.discount,
+      event: { ...d.event, clientId: null, clientName: name },
+    }));
+  }
+
   const totals = quoteTotals({
     lines,
-    discount: draft.discount,
+    discount,
     pkg,
     event: engineEvent,
     settings,
@@ -113,7 +161,7 @@ export function QuoteBuilder({
     event: draft.event,
     packageId: draft.packageId,
     pricePerHead: price,
-    discount: draft.discount,
+    discount,
     addonIds: draft.addonIds,
     customLines: draft.customLines,
   });
@@ -123,14 +171,20 @@ export function QuoteBuilder({
   return (
     <div className={ui.splitGrid}>
       <Card title="Event details">
-        <Field label="Client" htmlFor="clientName">
-          <Input
-            id="clientName"
-            value={draft.event.clientName}
-            onChange={(e) => setEvent("clientName", e.target.value)}
-            placeholder="e.g. Harper & Co. wedding"
+        <ClientPicker
+          clientId={draft.event.clientId}
+          clientName={draft.event.clientName}
+          onType={typeClientName}
+          onPick={pickClient}
+        />
+
+        {brief ? (
+          <ClientBriefPanel
+            brief={brief}
+            discountApplied={discountFollowsClient ? discount : null}
+            onClear={() => typeClientName(draft.event.clientName)}
           />
-        </Field>
+        ) : null}
 
         <Row>
           <Field label="Date" htmlFor="eventDate">
@@ -424,15 +478,17 @@ export function QuoteBuilder({
                       type="number"
                       min={0}
                       step="0.01"
-                      value={centsToDollars(draft.discount)}
+                      value={centsToDollars(discount)}
                       aria-label="Discount"
-                      onChange={(e) =>
-                        setDraft((d) => ({ ...d, discount: dollarsToCents(e.target.value) }))
-                      }
+                      onChange={(e) => {
+                        // Their own number now: stop following the client rate.
+                        setDiscountFollowsClient(false);
+                        setDraft((d) => ({ ...d, discount: dollarsToCents(e.target.value) }));
+                      }}
                     />
                   </td>
                   <td className={ui.num}>
-                    {draft.discount ? moneyDeduction(draft.discount) : "—"}
+                    {discount ? moneyDeduction(discount) : "—"}
                   </td>
                   <td />
                 </tr>

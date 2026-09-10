@@ -13,6 +13,7 @@ type NavItem = { href: Route; label: string };
 const PRIMARY: NavItem[] = [
   { href: "/app/quotes/new", label: "New quote" },
   { href: "/app/quotes", label: "Quotes" },
+  { href: "/app/clients", label: "Clients" },
   { href: "/app/ordering", label: "Ordering" },
 ];
 

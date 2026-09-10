@@ -58,6 +58,7 @@ beforeAll(async () => {
 
 const input = (clientName: string): QuoteWriteInput => ({
   event: {
+    clientId: null,
     clientName,
     contactEmail: ORIGINAL_EMAIL,
     eventDate: "2026-11-14",

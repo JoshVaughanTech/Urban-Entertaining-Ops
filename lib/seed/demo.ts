@@ -12,7 +12,7 @@
  *
  * Dates are relative to today, so the demo never goes stale. */
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import type { PgDatabase } from "drizzle-orm/pg-core";
 
 import * as s from "@/lib/db/schema";
@@ -47,6 +47,50 @@ type DemoQuote = {
 };
 
 const DEMO: DemoQuote[] = [
+  /* ── a returning client ─────────────────────────────────────────────────
+     Three events under one name, so the client database has something to
+     recognise. Everything else here is a one-off, and a book of work where no
+     client ever comes back cannot show the feature working. */
+  {
+    clientName: "Rosslyn Chambers",
+    contactEmail: "practice.manager@rosslyn.example",
+    dayOffset: -240,
+    guests: 60,
+    packageSlug: "cocktail_signature",
+    style: "cocktail",
+    durationHours: 3,
+    venue: "Melbourne CBD",
+    dietary: ["gf"],
+    addonSlugs: [],
+    status: "confirmed",
+  },
+  {
+    clientName: "Rosslyn Chambers",
+    contactEmail: "practice.manager@rosslyn.example",
+    dayOffset: -95,
+    guests: 75,
+    packageSlug: "cocktail_signature",
+    style: "cocktail",
+    durationHours: 4,
+    venue: "Melbourne CBD",
+    dietary: ["gf", "vegetarian"],
+    addonSlugs: ["bar"],
+    status: "confirmed",
+  },
+  {
+    clientName: "Rosslyn Chambers",
+    contactEmail: "practice.manager@rosslyn.example",
+    dayOffset: 27,
+    guests: 90,
+    packageSlug: "cocktail_signature",
+    style: "cocktail",
+    durationHours: 4,
+    venue: "Melbourne CBD",
+    dietary: ["gf", "vegetarian"],
+    addonSlugs: ["bar"],
+    status: "sent",
+  },
+
   /* ── confirmed, upcoming: these drive the ordering screen ───────────── */
   {
     clientName: "Alderman & Wyatt — partner dinner",
@@ -307,6 +351,7 @@ export async function seedDemo(db: Db): Promise<DemoReport> {
       db,
       {
         event: {
+          clientId: null,
           clientName: q.clientName,
           contactEmail: q.contactEmail,
           eventDate: addDays(today, q.dayOffset),
@@ -349,5 +394,55 @@ export async function seedDemo(db: Db): Promise<DemoReport> {
     created += 1;
   }
 
+  await fleshOutReturningClient(db);
+
   return { created, skipped: false };
+}
+
+/* The returning client above is created by createQuote like any other, with an
+   empty record. Giving them a standing discount, the notes and a couple of
+   contacts is what makes the quote builder's panel worth looking at — and it is
+   the only way to see the discount pre-fill without typing a percentage in
+   first. Idempotent, so re-running the demo seed does not duplicate contacts. */
+async function fleshOutReturningClient(db: Db): Promise<void> {
+  const [client] = await db
+    .select()
+    .from(s.clients)
+    .where(sql`lower(${s.clients.name}) = 'rosslyn chambers'`)
+    .limit(1);
+  if (!client) return;
+
+  await db
+    .update(s.clients)
+    .set({
+      discountPct: 10,
+      preferences: "No shellfish. Canapés passed, never stationed. They like the room dark.",
+      staffNotes: "Always requests Maria on service. Two behind the bar, not one.",
+    })
+    .where(eq(s.clients.id, client.id));
+
+  const existing = await db
+    .select()
+    .from(s.clientContacts)
+    .where(eq(s.clientContacts.clientId, client.id));
+  if (existing.length > 0) return;
+
+  await db.insert(s.clientContacts).values([
+    {
+      clientId: client.id,
+      role: "booker" as const,
+      name: "Priya Raman",
+      email: "practice.manager@rosslyn.example",
+      phone: "03 9000 0000",
+      isPrimary: true,
+    },
+    {
+      clientId: client.id,
+      role: "on_site" as const,
+      name: "Tom Beckett",
+      email: null,
+      phone: "0400 000 000",
+      isPrimary: false,
+    },
+  ]);
 }

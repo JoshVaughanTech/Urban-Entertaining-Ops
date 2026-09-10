@@ -86,8 +86,16 @@ export function parseQuotePayload(data: FormData): QuoteWriteInput {
       })
     : [];
 
+  /* A uuid or nothing. Anything else is dropped rather than passed to the
+     database, where it would fail the foreign key with a Postgres error. */
+  const rawClientId = String(event["clientId"] ?? "").trim();
+  const clientId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawClientId)
+    ? rawClientId
+    : null;
+
   return {
     event: {
+      clientId,
       clientName,
       contactEmail: String(event["contactEmail"] ?? "").trim() || null,
       eventDate,

@@ -54,6 +54,7 @@ const blank = { discountPct: 0, preferences: null, staffNotes: null };
 
 const quoteInput = (clientName: string, over: Partial<QuoteWriteInput> = {}): QuoteWriteInput => ({
   event: {
+    clientId: null,
     clientName,
     contactEmail: null,
     eventDate: "2026-11-14",

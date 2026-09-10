@@ -47,6 +47,7 @@ beforeAll(async () => {
 
 const input = (over: Partial<QuoteWriteInput> = {}): QuoteWriteInput => ({
   event: {
+    clientId: null,
     clientName: "Harper & Co. Wedding",
     contactEmail: "harper@example.com",
     eventDate: "2026-11-14",

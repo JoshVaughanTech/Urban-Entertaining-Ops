@@ -8,11 +8,17 @@ import { randomBytes } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import type { PgDatabase } from "drizzle-orm/pg-core";
 
+import { findOrCreateClient } from "@/lib/data/clients";
 import * as s from "@/lib/db/schema";
 import { buildQuoteLines } from "@/lib/engine/pricing";
 import { buildSnapshot } from "@/lib/engine/snapshot";
 import type { Addon, Catalogue, QuoteLine, Settings } from "@/lib/engine/types";
-import { QuoteError, type QuoteStatus, type QuoteWriteInput } from "@/lib/quotes/types";
+import {
+  QuoteError,
+  type QuoteEventInput,
+  type QuoteStatus,
+  type QuoteWriteInput,
+} from "@/lib/quotes/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Db = PgDatabase<any, any, any>;
@@ -21,6 +27,24 @@ type Db = PgDatabase<any, any, any>;
 export { QuoteError };
 
 const num = (n: number) => String(n);
+
+/** The client this event belongs to.
+ *
+ *  Picking a suggestion in the builder sends an id. Typing a name that matched
+ *  nothing sends none, and the client is created here — otherwise the quote
+ *  would be orphaned from the history it is about to become part of, and the
+ *  next quote for the same people would look like a first booking.
+ *
+ *  Matching is exact-once-normalised, so "Harper" never silently attaches to
+ *  "Harper & Co.". Anything looser is the typeahead's job, where a person
+ *  decides. Note this does **not** overwrite event.clientName: that stays as
+ *  typed and is what the quote freezes. */
+async function resolveClientId(tx: Db, event: QuoteEventInput): Promise<string | null> {
+  if (event.clientId) return event.clientId;
+  if (!event.clientName.trim()) return null;
+  const client = await findOrCreateClient(tx, event.clientName);
+  return client.id;
+}
 
 /** Next sequential reference, taken under a row lock so two staff saving at
  *  the same moment cannot both get UE-1051. */
@@ -126,6 +150,7 @@ export async function createQuote(
     const [event] = await tx
       .insert(s.events)
       .values({
+        clientId: await resolveClientId(tx, input.event),
         clientName: input.event.clientName,
         contactEmail: input.event.contactEmail,
         eventDate: input.event.eventDate,
@@ -185,6 +210,7 @@ export async function updateQuote(
     await tx
       .update(s.events)
       .set({
+        clientId: await resolveClientId(tx, input.event),
         clientName: input.event.clientName,
         contactEmail: input.event.contactEmail,
         eventDate: input.event.eventDate,

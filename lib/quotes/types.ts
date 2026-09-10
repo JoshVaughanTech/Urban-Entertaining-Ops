@@ -6,6 +6,10 @@ export class QuoteError extends Error {}
 /** What the builder sends when it saves. Shared by the client form, the
  *  server action and the write layer, so all three agree on the shape. */
 export type QuoteEventInput = {
+  /** The client this event belongs to, when one was picked or created.
+   *  Nullable: clientName is still the frozen label on the quote, and a legacy
+   *  event may have no client at all. */
+  clientId: string | null;
   clientName: string;
   contactEmail: string | null;
   eventDate: string;
