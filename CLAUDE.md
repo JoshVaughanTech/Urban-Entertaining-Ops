@@ -208,9 +208,10 @@ database to themselves — stop `npm run dev` first when running against the loc
 
 Three roles. **admin** manages access; **staff** quote and order; **viewer** is read-only —
 it sees every screen and changes nothing, which is what makes a demo account safe to hand
-out. Every action that writes or sends calls `denyReadOnly()`; the only unguarded one is
-`previewImport`, which validates an uploaded file and writes nothing. A viewer especially
-cannot email a client or a supplier.
+out. Every action that writes or sends calls `denyReadOnly()`. Three do not, and all three only
+read: `previewImport` validates an uploaded file, `searchClients` and `getClientBrief`
+back the quote builder’s client picker. They still call `requireUser()` — a viewer may
+read, a stranger may not. A viewer especially cannot email a client or a supplier.
 
 The matching UI lives in `components/ReadOnly.tsx` — `useReadOnly()` and `<CanWrite>`, fed
 by the app layout. Write controls hide themselves rather than refusing on click.
