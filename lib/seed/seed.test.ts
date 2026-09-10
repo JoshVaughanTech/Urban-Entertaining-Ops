@@ -291,3 +291,40 @@ async function counts() {
   }
   return out;
 }
+
+/* The seed writes events directly rather than through createQuote, so it has
+   to link their clients itself. It did not, and three sample quotes sat
+   outside any client's history — invisible on the client screens, and a second
+   client would have been opened the next time someone quoted that name. */
+describe("the seed's clients", () => {
+  it("leaves no event without one", async () => {
+    const { rows } = await db.execute(
+      sql`select count(*)::int as n from events where client_id is null`,
+    );
+    expect((rows[0] as { n: number }).n).toBe(0);
+  });
+
+  it("creates one client per distinct sample client name", async () => {
+    const { rows } = await db.execute(sql`
+      select
+        (select count(distinct lower(client_name))::int from events) as names,
+        (select count(*)::int from clients) as clients
+    `);
+    const { names, clients } = rows[0] as { names: number; clients: number };
+    expect(clients).toBe(names);
+  });
+
+  it("puts every sample quote into its client's history", async () => {
+    const { rows } = await db.execute(sql`
+      select c.name, count(q.id)::int as quotes
+      from clients c
+      join events e on e.client_id = c.id
+      join quotes q on q.event_id = e.id
+      group by c.name
+    `);
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows as { quotes: number }[]) {
+      expect(row.quotes).toBeGreaterThan(0);
+    }
+  });
+});

@@ -8,6 +8,7 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { PgDatabase } from "drizzle-orm/pg-core";
 
+import { findOrCreateClient } from "@/lib/data/clients";
 import { buildCatalogue } from "@/lib/engine/catalogue";
 import { buildQuoteLines, tierPrice } from "@/lib/engine/pricing";
 import { buildSnapshot } from "@/lib/engine/snapshot";
@@ -258,9 +259,16 @@ export async function seedDatabase(db: Db): Promise<SeedReport> {
       dietary: [],
     };
 
+    /* Through the same path the app uses, so there is exactly one way a client
+       comes into existence. Writing the event without one leaves it out of that
+       client's history, and quoting the same name later would open a second
+       client rather than finding the first. */
+    const client = await findOrCreateClient(db, event.clientName);
+
     const [eventRow] = await db
       .insert(s.events)
       .values({
+        clientId: client.id,
         clientName: event.clientName,
         eventDate: event.eventDate,
         guests: event.guests,
